@@ -1,0 +1,67 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Employee Portal - Security Compliance{% endblock %}
+{% block page_title %}My Compliance Tasks & Posture Portal{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-4">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-muted fw-semibold">My Assigned Tasks</small>
+                <h3 class="fw-bold mb-0 text-primary">{{ stats.my_tasks }}</h3>
+                <small class="text-muted">Compliance Actions</small>
+            </div>
+            <div class="kpi-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-tasks"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-muted fw-semibold">Evidence Uploaded</small>
+                <h3 class="fw-bold mb-0 text-success">{{ stats.my_evidence }}</h3>
+                <small class="text-muted">Submitted Proof Documents</small>
+            </div>
+            <div class="kpi-icon bg-success bg-opacity-10 text-success"><i class="fas fa-file-arrow-up"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-4">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-muted fw-semibold">Overall Compliance</small>
+                <h3 class="fw-bold mb-0 text-info">{{ stats.compliance_score }}%</h3>
+                <small class="text-muted">System Score</small>
+            </div>
+            <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="fas fa-shield-check"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h6 class="fw-bold mb-0"><i class="fas fa-list-check text-primary me-2"></i> My Active Tasks</h6>
+                <a href="{{ url_for('tasks') }}" class="small text-decoration-none">View All Tasks</a>
+            </div>
+            <div class="card-body">
+                <p class="small text-muted mb-3">Complete assigned compliance actions and upload evidence documents (PDF, DOCX, Images) to maintain endpoint security compliance.</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('tasks') }}" class="btn btn-primary btn-sm py-2 fw-semibold"><i class="fas fa-tasks me-2"></i> Open My Tasks Queue</a>
+                    <a href="{{ url_for('evidence') }}" class="btn btn-outline-success btn-sm py-2 fw-semibold"><i class="fas fa-file-arrow-up me-2"></i> Upload Task Evidence File</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm rounded-3 p-4 bg-light">
+            <h6 class="fw-bold mb-2"><i class="fas fa-user-circle me-2 text-info"></i> Employee Profile</h6>
+            <small class="text-muted d-block mb-1"><strong>Name:</strong> {{ current_user.full_name }}</small>
+            <small class="text-muted d-block mb-1"><strong>Email:</strong> {{ current_user.email }}</small>
+            <small class="text-muted d-block mb-3"><strong>Department:</strong> {{ current_user.department.name if current_user.department else 'General' }}</small>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary btn-sm w-100 fw-semibold"><i class="fas fa-user-edit me-1"></i> Edit My Profile</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
