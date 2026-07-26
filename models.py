@@ -2,6 +2,7 @@ from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from services.timezone_service import get_ist_now
 
 db = SQLAlchemy()
 
@@ -15,7 +16,7 @@ class Department(db.Model):
     code          = db.Column(db.String(20),  nullable=False, unique=True)
     description   = db.Column(db.Text,        nullable=True)
     manager_name  = db.Column(db.String(100), nullable=True)
-    created_at    = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at    = db.Column(db.DateTime,    default=get_ist_now)
 
     users = db.relationship('User', backref='department', lazy=True)
 
@@ -38,8 +39,8 @@ class User(UserMixin, db.Model):
     status              = db.Column(db.String(20),  default='Active')  # Active / Inactive
     must_change_password= db.Column(db.Boolean,     default=False)
     last_login          = db.Column(db.DateTime,    nullable=True)
-    created_at          = db.Column(db.DateTime,    default=datetime.utcnow)
-    updated_at          = db.Column(db.DateTime,    default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at          = db.Column(db.DateTime,    default=get_ist_now)
+    updated_at          = db.Column(db.DateTime,    default=get_ist_now, onupdate=get_ist_now)
 
     # Relationships
     tasks_assigned  = db.relationship('Task', foreign_keys='Task.assigned_to_id', backref='assignee',   lazy=True)
@@ -79,7 +80,7 @@ class Framework(db.Model):
     description = db.Column(db.Text,        nullable=True)
     category    = db.Column(db.String(50),  nullable=True)
     status      = db.Column(db.String(20),  default='Enabled')
-    created_at  = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at  = db.Column(db.DateTime,    default=get_ist_now)
 
     policies = db.relationship('Policy',  backref='framework', lazy=True, cascade='all, delete-orphan')
     controls = db.relationship('Control', backref='framework', lazy=True, cascade='all, delete-orphan')
@@ -99,8 +100,8 @@ class Policy(db.Model):
     version       = db.Column(db.String(20),  default='1.0')
     status        = db.Column(db.String(20),  default='Active')  # Draft / Active / Archived
     created_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    created_at    = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at    = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at    = db.Column(db.DateTime, default=get_ist_now)
+    updated_at    = db.Column(db.DateTime, default=get_ist_now, onupdate=get_ist_now)
 
     creator = db.relationship('User', foreign_keys=[created_by_id])
 
@@ -136,7 +137,7 @@ class Task(db.Model):
     due_date        = db.Column(db.Date,        nullable=False)
     status          = db.Column(db.String(30),  default='Pending')
     completed_at    = db.Column(db.DateTime,    nullable=True)
-    created_at      = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at      = db.Column(db.DateTime,    default=get_ist_now)
 
     evidences = db.relationship('Evidence', backref='task', lazy=True, cascade='all, delete-orphan')
 
@@ -155,7 +156,7 @@ class Evidence(db.Model):
     review_status    = db.Column(db.String(30),  default='Pending')  # Pending / Approved / Rejected
     reviewer_comments= db.Column(db.Text,        nullable=True)
     reviewer_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    uploaded_at      = db.Column(db.DateTime, default=datetime.utcnow)
+    uploaded_at      = db.Column(db.DateTime, default=get_ist_now)
     reviewed_at      = db.Column(db.DateTime, nullable=True)
 
 # ─────────────────────────────────────────────
@@ -175,7 +176,7 @@ class Audit(db.Model):
     findings        = db.Column(db.Text,        nullable=True)
     recommendations = db.Column(db.Text,        nullable=True)
     final_status    = db.Column(db.String(30),  default='Pending')
-    created_at      = db.Column(db.DateTime,    default=datetime.utcnow)
+    created_at      = db.Column(db.DateTime,    default=get_ist_now)
 
 # ─────────────────────────────────────────────
 # Risk Assessment
@@ -192,7 +193,7 @@ class RiskAssessment(db.Model):
     risk_level      = db.Column(db.String(20), default='Medium')
     mitigations     = db.Column(db.Text,       nullable=True)
     assessed_by_id  = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    created_at      = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at      = db.Column(db.DateTime, default=get_ist_now)
 
     assessor = db.relationship('User', foreign_keys=[assessed_by_id])
 
@@ -208,7 +209,7 @@ class Notification(db.Model):
     type       = db.Column(db.String(20),  default='info')  # info / success / warning / danger
     is_read    = db.Column(db.Boolean,     default=False)
     link       = db.Column(db.String(200), nullable=True)
-    created_at = db.Column(db.DateTime,   default=datetime.utcnow)
+    created_at = db.Column(db.DateTime,   default=get_ist_now)
 
 # ─────────────────────────────────────────────
 # Activity / Audit Log
@@ -222,4 +223,4 @@ class ActivityLog(db.Model):
     action     = db.Column(db.String(100), nullable=False)
     details    = db.Column(db.Text,        nullable=True)
     ip_address = db.Column(db.String(45),  nullable=True)
-    created_at = db.Column(db.DateTime,   default=datetime.utcnow)
+    created_at = db.Column(db.DateTime,   default=get_ist_now)

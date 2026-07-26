@@ -35,7 +35,7 @@
                     <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">{{ l.action }}</span></td>
                     <td class="small text-secondary">{{ l.details }}</td>
                     <td class="small font-monospace text-muted">{{ l.ip_address or '127.0.0.1' }}</td>
-                    <td class="small text-muted">{{ l.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td class="small text-muted">{{ l.created_at | format_datetime }}</td>
                 </tr>
                 {% else %}
                 <tr>

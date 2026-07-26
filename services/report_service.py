@@ -7,6 +7,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
+from services.timezone_service import get_ist_now, format_ist
 
 class ReportGenerator:
     @staticmethod
@@ -25,6 +26,7 @@ class ReportGenerator:
         
         ws1.append(["SECURITY COMPLIANCE MANAGEMENT SYSTEM"])
         ws1.append(["Executive Compliance Summary Report"])
+        ws1.append([f"Generated Date (IST): {format_ist(get_ist_now())}"])
         ws1.append([])
         
         ws1.append(["Metric", "Value"])
@@ -40,13 +42,15 @@ class ReportGenerator:
         # Format table
         ws1.merge_cells("A1:B1")
         ws1.merge_cells("A2:B2")
+        ws1.merge_cells("A3:B3")
         ws1["A1"].font = title_font
         ws1["A2"].font = sub_font
+        ws1["A3"].font = Font(name="Segoe UI", size=9, italic=True, color="666666")
         
-        ws1["A4"].font = Font(bold=True, color="FFFFFF")
-        ws1["A4"].fill = header_fill
-        ws1["B4"].font = Font(bold=True, color="FFFFFF")
-        ws1["B4"].fill = header_fill
+        ws1["A5"].font = Font(bold=True, color="FFFFFF")
+        ws1["A5"].fill = header_fill
+        ws1["B5"].font = Font(bold=True, color="FFFFFF")
+        ws1["B5"].fill = header_fill
         
         # Sheet 2: Frameworks & Controls
         ws2 = wb.create_sheet(title="Frameworks & Controls")
@@ -165,7 +169,7 @@ class ReportGenerator:
             'DocSubTitle',
             parent=styles['Normal'],
             fontName='Helvetica',
-            fontSize=11,
+            fontSize=10,
             leading=14,
             textColor=colors.HexColor('#475569'),
             alignment=1,
@@ -196,7 +200,7 @@ class ReportGenerator:
         
         # Document Header
         story.append(Paragraph("SECURITY COMPLIANCE MANAGEMENT SYSTEM", title_style))
-        story.append(Paragraph("Official Audit & Executive Compliance Assessment Report", subtitle_style))
+        story.append(Paragraph(f"Official Audit & Executive Compliance Assessment Report — Generated (IST): {format_ist(get_ist_now())}", subtitle_style))
         story.append(HRFlowable(width="100%", thickness=2, color=colors.HexColor('#2563EB'), spaceAfter=15))
         
         # Summary KPI Table

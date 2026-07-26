@@ -5,6 +5,7 @@ Activity logging helper – records every important action into the ActivityLog 
 from flask_login import current_user
 from flask import request as flask_request
 from models import db, ActivityLog
+from services.timezone_service import get_ist_now
 
 
 def log_activity(action: str, details: str = ''):
@@ -28,6 +29,7 @@ def log_activity(action: str, details: str = ''):
             action     = action,
             details    = details,
             ip_address = ip,
+            created_at = get_ist_now(),
         )
         db.session.add(log)
         db.session.commit()

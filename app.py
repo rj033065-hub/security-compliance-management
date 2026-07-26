@@ -20,6 +20,7 @@ from models import (db, User, Department, Framework, Policy, Control,
 from services.ai_service import AIConsultant
 from services.report_service import ReportGenerator
 from services.log_service import log_activity
+from services.timezone_service import get_ist_now, to_ist, format_ist
 
 # ─────────────────────────────────────────────
 # App factory
@@ -71,6 +72,18 @@ def inject_globals():
     if current_user.is_authenticated:
         unread = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
     return dict(unread_notifications_count=unread)
+
+
+@app.template_filter('format_datetime')
+def format_datetime_filter(value, fmt="%d %b %Y, %I:%M:%S %p", default="N/A"):
+    if not value:
+        return default
+    return format_ist(value, fmt=fmt, default=default)
+
+
+@app.template_filter('to_ist')
+def to_ist_filter(value):
+    return to_ist(value)
 
 
 # ─────────────────────────────────────────────
@@ -214,7 +227,7 @@ def login():
             return redirect(url_for('login'))
 
         login_user(user, remember=remember)
-        user.last_login = datetime.utcnow()
+        user.last_login = get_ist_now()
         db.session.commit()
         log_activity('Login', f'{user.email} authenticated as {user.role}')
 
@@ -287,7 +300,7 @@ def login_google():
         return redirect(url_for('login'))
 
     login_user(user, remember=True)
-    user.last_login = datetime.utcnow()
+    user.last_login = get_ist_now()
     db.session.commit()
     log_activity('Google SSO Login', f'{google_email}')
     flash(f'Signed in with Google as {user.full_name}!', 'success')
@@ -427,7 +440,7 @@ USERS_PER_PAGE = 10
 
 @app.route('/users')
 @login_required
-@role_required('Super Admin', 'Admin')
+@role_required('Super Admin', 'Admin', 'Auditor')
 def users():
     q           = request.args.get('q', '').strip()
     role_f      = request.args.get('role_filter', '').strip()
@@ -511,26 +524,49 @@ def edit_user(uid):
 
     # Admins cannot edit Super Admins
     if current_user.role == 'Admin' and u.role == 'Super Admin':
-        flash('Access denied.', 'danger')
+        flash('Access denied. Admins cannot edit Super Admin accounts.', 'danger')
         return redirect(url_for('users'))
 
-    u.full_name    = _normalize_text(request.form.get('full_name', u.full_name)) or u.full_name
-    u.phone        = _normalize_text(request.form.get('phone', ''))
-    dept_id        = request.form.get('department_id')
-    u.department_id= int(dept_id) if dept_id else None
+    full_name = _normalize_text(request.form.get('full_name', u.full_name))
+    email     = _normalize_text(request.form.get('email', u.email)).lower()
+    username  = _normalize_text(request.form.get('username', u.username)).lower()
+    phone     = _normalize_text(request.form.get('phone', ''))
+
+    if not full_name:
+        flash('Full name cannot be empty.', 'danger')
+        return redirect(url_for('users'))
+
+    if email and email != u.email:
+        existing = User.query.filter_by(email=email).first()
+        if existing and existing.id != u.id:
+            flash('An account with that email address already exists.', 'danger')
+            return redirect(url_for('users'))
+        u.email = email
+
+    if username and username != u.username:
+        existing = User.query.filter_by(username=username).first()
+        if existing and existing.id != u.id:
+            flash('Username is already taken by another account.', 'danger')
+            return redirect(url_for('users'))
+        u.username = username
+
+    u.full_name     = full_name
+    u.phone         = phone
+    dept_id         = request.form.get('department_id')
+    u.department_id = int(dept_id) if dept_id else None
 
     # Only Super Admin can change roles
     if current_user.role == 'Super Admin':
         new_role = request.form.get('role', u.role)
         if new_role == 'Super Admin' and u.role != 'Super Admin':
             if User.query.filter_by(role='Super Admin').first():
-                flash('Only one Super Admin is allowed.', 'danger')
+                flash('Only one Super Admin account is allowed in the system.', 'danger')
                 return redirect(url_for('users'))
         u.role = new_role
 
     db.session.commit()
     log_activity('User Edited', f'{u.email}')
-    flash(f'{u.email} updated.', 'success')
+    flash(f'User details for {u.email} updated successfully.', 'success')
     return redirect(url_for('users'))
 
 
@@ -542,10 +578,19 @@ def toggle_user_status(uid):
     if u.role == 'Super Admin':
         flash('The Super Admin account cannot be deactivated.', 'danger')
         return redirect(url_for('users'))
+
+    if current_user.role == 'Admin' and u.role in ['Super Admin', 'Admin']:
+        flash('Admins cannot change the status of other Admin or Super Admin accounts.', 'danger')
+        return redirect(url_for('users'))
+
+    if u.id == current_user.id:
+        flash('You cannot deactivate your own account.', 'warning')
+        return redirect(url_for('users'))
+
     u.status = 'Inactive' if u.status == 'Active' else 'Active'
     db.session.commit()
     log_activity('User Status Changed', f'{u.email} → {u.status}')
-    flash(f'{u.email} is now {u.status}.', 'info')
+    flash(f'Status for {u.email} changed to {u.status}.', 'success')
     return redirect(url_for('users'))
 
 
@@ -555,7 +600,7 @@ def toggle_user_status(uid):
 def admin_reset_password(uid):
     u  = User.query.get_or_404(uid)
     if current_user.role == 'Admin' and u.role == 'Super Admin':
-        flash('Access denied.', 'danger')
+        flash('Access denied. Admins cannot reset Super Admin passwords.', 'danger')
         return redirect(url_for('users'))
 
     pw = request.form.get('new_password', '')
@@ -565,10 +610,11 @@ def admin_reset_password(uid):
         return redirect(url_for('users'))
 
     u.set_password(pw)
+    u.must_change_password = True
     db.session.commit()
-    create_notification(u.id, 'Password reset', 'Your password has been reset by an administrator. Please sign in and update it if required.', link='/profile', notification_type='warning')
+    create_notification(u.id, 'Password reset', 'Your password has been reset by an administrator. Please sign in and update it.', link='/profile', notification_type='warning')
     log_activity('Password Reset (Admin)', f'Reset for {u.email}')
-    flash(f'Password reset for {u.email}.', 'success')
+    flash(f'Password for {u.email} reset successfully.', 'success')
     return redirect(url_for('users'))
 
 
@@ -577,7 +623,7 @@ def admin_reset_password(uid):
 @role_required('Super Admin')
 def delete_user(uid):
     if uid == current_user.id:
-        flash('You cannot delete your own account.', 'danger')
+        flash('You cannot delete your own active account.', 'danger')
         return redirect(url_for('users'))
 
     u = User.query.get_or_404(uid)
@@ -586,16 +632,22 @@ def delete_user(uid):
         return redirect(url_for('users'))
 
     email = u.email
-    # Re-assign owned records to current Super Admin
-    Task.query.filter_by(assigned_to_id=u.id).update({'assigned_to_id': current_user.id})
-    Task.query.filter_by(assigned_by_id=u.id).update({'assigned_by_id': current_user.id})
-    Evidence.query.filter_by(employee_id=u.id).update({'employee_id': current_user.id})
+    # Re-assign or nullify owned records safely before deletion
+    reassign_user_id = current_user.id
+    Task.query.filter_by(assigned_to_id=u.id).update({'assigned_to_id': reassign_user_id})
+    Task.query.filter_by(assigned_by_id=u.id).update({'assigned_by_id': reassign_user_id})
+    Evidence.query.filter_by(employee_id=u.id).update({'employee_id': reassign_user_id})
+    Evidence.query.filter_by(reviewer_id=u.id).update({'reviewer_id': None})
+    Audit.query.filter_by(auditor_id=u.id).update({'auditor_id': reassign_user_id})
+    Policy.query.filter_by(created_by_id=u.id).update({'created_by_id': reassign_user_id})
+    RiskAssessment.query.filter_by(assessed_by_id=u.id).update({'assessed_by_id': reassign_user_id})
     Notification.query.filter_by(user_id=u.id).delete()
+    ActivityLog.query.filter_by(user_id=u.id).update({'user_id': None})
 
     db.session.delete(u)
     db.session.commit()
     log_activity('User Deleted', f'{email}')
-    flash(f'User {email} permanently deleted.', 'warning')
+    flash(f'User account {email} permanently deleted.', 'warning')
     return redirect(url_for('users'))
 
 
@@ -834,10 +886,10 @@ def review_evidence(eid):
     ev.review_status     = request.form.get('review_status')
     ev.reviewer_comments = request.form.get('reviewer_comments')
     ev.reviewer_id       = current_user.id
-    ev.reviewed_at       = datetime.utcnow()
+    ev.reviewed_at       = get_ist_now()
     if ev.review_status == 'Approved' and ev.task:
         ev.task.status       = 'Completed'
-        ev.task.completed_at = datetime.utcnow()
+        ev.task.completed_at = get_ist_now()
     db.session.commit()
     log_activity('Evidence Reviewed', f'#{eid} → {ev.review_status}')
     flash(f'Evidence {ev.review_status}.', 'success')
@@ -1001,7 +1053,7 @@ def export_excel_report():
     return send_file(buf,
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                      as_attachment=True,
-                     download_name=f"Compliance_Report_{datetime.utcnow().strftime('%Y%m%d')}.xlsx")
+                     download_name=f"Compliance_Report_{get_ist_now().strftime('%Y%m%d_%H%M%S')}.xlsx")
 
 
 @app.route('/reports/export/pdf')
@@ -1012,7 +1064,7 @@ def export_pdf_report():
         Task.query.all(), Audit.query.all(), RiskAssessment.query.all())
     log_activity('Report Exported', 'PDF')
     return send_file(buf, mimetype='application/pdf', as_attachment=True,
-                     download_name=f"Compliance_Audit_{datetime.utcnow().strftime('%Y%m%d')}.pdf")
+                     download_name=f"Compliance_Audit_{get_ist_now().strftime('%Y%m%d_%H%M%S')}.pdf")
 
 
 # ─────────────────────────────────────────────

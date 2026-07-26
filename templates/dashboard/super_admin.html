@@ -94,7 +94,7 @@
                             <td class="fw-semibold text-dark">{{ log.user_name }}</td>
                             <td><span class="badge bg-secondary bg-opacity-10 text-dark border">{{ log.action }}</span></td>
                             <td class="text-muted">{{ log.details[:45] if log.details else '' }}...</td>
-                            <td class="text-muted">{{ log.created_at.strftime('%H:%M:%S') }}</td>
+                            <td class="text-muted small">{{ log.created_at | format_datetime }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

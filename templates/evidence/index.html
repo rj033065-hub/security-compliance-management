@@ -47,7 +47,7 @@
                         <small class="badge bg-light text-dark border">{{ e.task.control.control_code if e.task and e.task.control else 'General' }}</small>
                     </td>
                     <td class="small text-muted">{{ e.uploader.username if e.uploader else 'Unknown' }}</td>
-                    <td class="small text-muted">{{ e.uploaded_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td class="small text-muted">{{ e.uploaded_at | format_datetime }}</td>
                     <td>
                         <span class="badge {% if e.review_status == 'Approved' %}bg-success{% elif e.review_status == 'Rejected' %}bg-danger{% else %}bg-warning text-dark{% endif %}">
                             {{ e.review_status }}

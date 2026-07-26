@@ -77,12 +77,12 @@
                     <li class="d-flex align-items-center gap-2 mb-2">
                         <i class="fas fa-calendar-plus text-primary" style="width:18px;"></i>
                         <span class="text-muted">Joined:</span>
-                        <strong class="ms-auto text-dark">{{ current_user.created_at.strftime('%d %b %Y') if current_user.created_at else '—' }}</strong>
+                        <strong class="ms-auto text-dark">{{ current_user.created_at | format_datetime(default='—') }}</strong>
                     </li>
                     <li class="d-flex align-items-center gap-2">
                         <i class="fas fa-clock text-primary" style="width:18px;"></i>
                         <span class="text-muted">Last Login:</span>
-                        <strong class="ms-auto text-dark">{{ current_user.last_login.strftime('%d %b, %H:%M') if current_user.last_login else 'First login' }}</strong>
+                        <strong class="ms-auto text-dark">{{ current_user.last_login | format_datetime(default='First login') }}</strong>
                     </li>
                 </ul>
             </div>
@@ -237,7 +237,7 @@
                     <div class="p-3 rounded-3 text-center" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
                         <div class="text-muted small mb-1">Account Created</div>
                         <div class="fw-bold text-dark">
-                            {{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else '—' }}
+                            {{ current_user.created_at | format_datetime(default='—') }}
                         </div>
                     </div>
                 </div>
@@ -245,7 +245,7 @@
                     <div class="p-3 rounded-3 text-center" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
                         <div class="text-muted small mb-1">Last Login</div>
                         <div class="fw-bold text-dark">
-                            {{ current_user.last_login.strftime('%B %d, %Y at %H:%M') if current_user.last_login else 'First session' }}
+                            {{ current_user.last_login | format_datetime(default='First session') }}
                         </div>
                     </div>
                 </div>
