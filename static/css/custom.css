@@ -568,16 +568,28 @@ body {
 .auth-body {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     position: relative;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 1.5rem 0;
+}
+
+.auth-body .container {
+    margin-top: auto;
+    margin-bottom: auto;
+    position: relative;
+    z-index: 10;
 }
 
 .auth-body::before {
     content: '';
-    position: absolute;
+    position: fixed;
     width: 350px;
     height: 350px;
     background: radial-gradient(circle, rgba(37, 99, 235, 0.35) 0%, transparent 70%);
@@ -585,11 +597,13 @@ body {
     left: -50px;
     border-radius: 50%;
     filter: blur(40px);
+    pointer-events: none;
+    z-index: 1;
 }
 
 .auth-body::after {
     content: '';
-    position: absolute;
+    position: fixed;
     width: 350px;
     height: 350px;
     background: radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 70%);
@@ -597,6 +611,8 @@ body {
     right: -50px;
     border-radius: 50%;
     filter: blur(40px);
+    pointer-events: none;
+    z-index: 1;
 }
 
 .auth-card {
@@ -609,6 +625,7 @@ body {
     overflow: hidden;
     width: 100%;
     max-width: 460px;
+    margin: 0 auto;
     position: relative;
     z-index: 10;
 }
