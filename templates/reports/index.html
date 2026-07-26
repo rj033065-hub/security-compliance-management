@@ -1,0 +1,43 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Reports - Security Compliance System{% endblock %}
+{% block page_title %}Compliance Reports &amp; Export Hub{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="fw-bold mb-1 text-dark">Audit &amp; Compliance Reports</h5>
+        <p class="text-muted small mb-0">Generate executive PDF audit reports and export complete compliance datasets to Excel</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- PDF Report Generator Card -->
+    <div class="col-md-6">
+        <div class="glass-card p-4 text-center h-100">
+            <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle d-inline-block mb-3 border border-danger border-opacity-25" style="box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);">
+                <i class="fas fa-file-pdf fa-3x"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Official PDF Audit Report</h5>
+            <p class="small text-muted mb-4 lh-base" style="max-width: 400px; margin: 0 auto;">
+                Includes executive KPI summary, framework status breakdown, high-risk items, active audits, and official auditor signature line.
+            </p>
+            <a href="{{ url_for('export_pdf_report') }}" class="btn btn-danger px-4 py-2.5 fw-bold shadow-md"><i class="fas fa-download me-2"></i> Download PDF Report</a>
+        </div>
+    </div>
+
+    <!-- Excel Dataset Export Card -->
+    <div class="col-md-6">
+        <div class="glass-card p-4 text-center h-100">
+            <div class="p-3 bg-success bg-opacity-10 text-success rounded-circle d-inline-block mb-3 border border-success border-opacity-25" style="box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);">
+                <i class="fas fa-file-excel fa-3x"></i>
+            </div>
+            <h5 class="fw-bold text-dark">Full Excel Dataset (.xlsx)</h5>
+            <p class="small text-muted mb-4 lh-base" style="max-width: 400px; margin: 0 auto;">
+                Exports multi-tab workbook containing complete Frameworks &amp; Controls, Tasks, Evidence records, Audits, and Risk Register.
+            </p>
+            <a href="{{ url_for('export_excel_report') }}" class="btn btn-success px-4 py-2.5 fw-bold shadow-md"><i class="fas fa-file-export me-2"></i> Export Excel Workbook</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

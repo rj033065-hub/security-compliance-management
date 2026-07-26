@@ -1,0 +1,99 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Admin Dashboard - Security Compliance{% endblock %}
+{% block page_title %}Admin Operations &amp; Compliance Control Center{% endblock %}
+
+{% block content %}
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-muted fw-semibold d-block mb-1">Compliance Score</small>
+                <h3 class="fw-extrabold mb-0 text-primary">{{ stats.compliance_score }}%</h3>
+                <small class="text-success fw-semibold"><i class="fas fa-shield-check me-1"></i> {{ stats.total_policies }} Active Policies</small>
+            </div>
+            <div class="kpi-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-file-contract"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-muted fw-semibold d-block mb-1">Pending / Under Review</small>
+                <h3 class="fw-extrabold mb-0 text-warning">{{ stats.pending_tasks }}</h3>
+                <small class="text-muted">{{ stats.completed_tasks }} Tasks Completed</small>
+            </div>
+            <div class="kpi-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-tasks"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-muted fw-semibold d-block mb-1">Evidence Reviews</small>
+                <h3 class="fw-extrabold mb-0 text-info">{{ stats.pending_reviews }}</h3>
+                <small class="text-muted">Response Ready</small>
+            </div>
+            <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="fas fa-folder-open"></i></div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="kpi-card d-flex align-items-center justify-content-between">
+            <div>
+                <small class="text-muted fw-semibold d-block mb-1">High / Critical Risks</small>
+                <h3 class="fw-extrabold mb-0 text-danger">{{ stats.high_risks }}</h3>
+                <small class="text-muted">Requires Controls</small>
+            </div>
+            <div class="kpi-icon bg-danger bg-opacity-10 text-danger"><i class="fas fa-biohazard"></i></div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="glass-card p-3">
+            <div class="mb-3 px-2">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-building text-info me-2"></i> Departmental Compliance Breakdown</h6>
+            </div>
+            <div style="height: 280px;">
+                <canvas id="deptChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="glass-card p-3">
+            <div class="mb-3 px-2">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-pie-chart text-warning me-2"></i> Task Status Overview</h6>
+            </div>
+            <div style="height: 280px;">
+                <canvas id="taskChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-12">
+        <div class="glass-card p-4">
+            <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-user-cog me-2 text-primary"></i> Admin Operational Shortcuts</h6>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="{{ url_for('tasks') }}" class="btn btn-primary w-100 py-2.5 fw-semibold shadow-sm"><i class="fas fa-plus me-1"></i> Assign Task</a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('evidence') }}" class="btn btn-info w-100 py-2.5 fw-semibold text-white shadow-sm"><i class="fas fa-folder-open me-1"></i> Review Evidence</a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('policies') }}" class="btn btn-glass w-100 py-2.5 fw-semibold border"><i class="fas fa-file-contract me-1"></i> Security Policies</a>
+                </div>
+                <div class="col-md-3">
+                    <a href="{{ url_for('reports') }}" class="btn btn-success w-100 py-2.5 fw-semibold shadow-sm"><i class="fas fa-file-pdf me-1"></i> View Reports</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Departments - Security Compliance System{% endblock %}
+{% block page_title %}Department Governance{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h5 class="fw-bold mb-1 text-dark">Company Departments</h5>
+        <p class="text-muted small mb-0">Organize employees and compliance accountability across organizational units</p>
+    </div>
+    {% if current_user.role in ['Super Admin', 'Admin'] %}
+    <button class="btn btn-primary btn-sm fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createDepartmentModal">
+        <i class="fas fa-plus me-1"></i> Add Department
+    </button>
+    {% endif %}
+</div>
+
+<div class="row g-4">
+    {% for d in departments %}
+    <div class="col-md-6 col-lg-4">
+        <div class="glass-card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold border border-primary border-opacity-25">{{ d.code }}</span>
+                <small class="text-muted"><i class="fas fa-users me-1 text-info"></i> {{ d.users|length }} Members</small>
+            </div>
+            <h5 class="fw-bold mb-1 text-dark">{{ d.name }}</h5>
+            <small class="text-muted d-block mb-3">Head: <strong class="text-dark">{{ d.manager_name or 'Unassigned' }}</strong></small>
+            <p class="small text-secondary mb-0 lh-base">{{ d.description }}</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Department Modal -->
+<div class="modal fade" id="createDepartmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('create_department') }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-dark">Add Department</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Department Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Legal &amp; Risk" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Code</label>
+                        <input type="text" name="code" class="form-control" placeholder="LEG-01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Department Head / Manager</label>
+                        <input type="text" name="manager_name" class="form-control" placeholder="Jane Doe">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Department compliance responsibilities..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm fw-bold">Save Department</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
