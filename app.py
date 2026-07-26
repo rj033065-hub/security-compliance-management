@@ -962,8 +962,10 @@ def ai_studio():
 @app.route('/api/ai/chat', methods=['POST'])
 @login_required
 def ai_chat_api():
-    data = request.get_json()
-    return jsonify(AIConsultant.answer_query(data.get('query', ''), role=current_user.role))
+    data = request.get_json(silent=True) or {}
+    query = data.get('query', '') if isinstance(data, dict) else ''
+    role = getattr(current_user, 'role', 'Admin') if current_user.is_authenticated else 'Admin'
+    return jsonify(AIConsultant.answer_query(query, role=role))
 
 
 # ─────────────────────────────────────────────

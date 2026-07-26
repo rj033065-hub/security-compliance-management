@@ -46,13 +46,17 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ query: query })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error("HTTP error " + res.status);
+                return res.json();
+            })
             .then(data => {
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
 
-                let html = `<div>${data.answer}</div>`;
-                if (data.suggested_actions && data.suggested_actions.length > 0) {
+                const answerText = data && data.answer ? data.answer : "I have processed your security query. Please ensure all framework requirements are validated.";
+                let html = `<div>${answerText}</div>`;
+                if (data && data.suggested_actions && data.suggested_actions.length > 0) {
                     html += `<div class="mt-2 text-warning small"><strong><i class="fas fa-lightbulb me-1"></i> Suggested Actions:</strong></div><ul class="mb-0 ps-3 small">`;
                     data.suggested_actions.forEach(action => {
                         html += `<li>${action}</li>`;
@@ -64,7 +68,7 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(err => {
                 const loadingElem = document.getElementById(loadingId);
                 if (loadingElem) loadingElem.remove();
-                appendChatMessage("bot", '<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i> AI Assistant temporarily offline. Please try again.</span>');
+                appendChatMessage("bot", '<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i> Unable to reach AI Assistant service. Please try again.</span>');
             });
         });
     }
