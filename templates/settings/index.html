@@ -6,67 +6,63 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h5 class="fw-bold mb-1">System Configuration & Administration</h5>
+        <h5 class="fw-bold mb-1 text-dark">System Configuration &amp; Administration</h5>
         <p class="text-muted small mb-0">Configure system preferences, email SMTP settings, backup policies, and log retention</p>
     </div>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-header bg-white py-3">
-                <h6 class="fw-bold mb-0"><i class="fas fa-sliders text-primary me-2"></i> General System Preferences</h6>
+        <div class="glass-card p-4">
+            <div class="mb-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-sliders text-primary me-2"></i> General System Preferences</h6>
             </div>
-            <div class="card-body">
-                <form action="{{ url_for('save_settings') }}" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Application Name</label>
-                        <input type="text" class="form-control" value="Security Compliance Management System" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Session Timeout Window</label>
-                        <select class="form-select">
-                            <option value="30">30 Minutes (Recommended)</option>
-                            <option value="60">1 Hour</option>
-                            <option value="120">2 Hours</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Default Security Framework</label>
-                        <select class="form-select">
-                            <option value="ISO-27001" selected>ISO/IEC 27001:2022</option>
-                            <option value="NIST">NIST Cybersecurity Framework 2.0</option>
-                            <option value="PCI">PCI DSS v4.0</option>
-                            <option value="HIPAA">HIPAA Security Rule</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm fw-semibold">Save Preferences</button>
-                </form>
-            </div>
+            <form action="{{ url_for('save_settings') }}" method="POST">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Application Name</label>
+                    <input type="text" class="form-control" value="Security Compliance Management System" readonly>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Session Timeout Window</label>
+                    <select class="form-select">
+                        <option value="30">30 Minutes (Recommended)</option>
+                        <option value="60">1 Hour</option>
+                        <option value="120">2 Hours</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Default Security Framework</label>
+                    <select class="form-select">
+                        <option value="ISO-27001" selected>ISO/IEC 27001:2022</option>
+                        <option value="NIST">NIST Cybersecurity Framework 2.0</option>
+                        <option value="PCI">PCI DSS v4.0</option>
+                        <option value="HIPAA">HIPAA Security Rule</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm fw-bold shadow-sm">Save Preferences</button>
+            </form>
         </div>
     </div>
 
     <div class="col-lg-6">
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-header bg-white py-3">
-                <h6 class="fw-bold mb-0"><i class="fas fa-database text-success me-2"></i> Database & Backup Settings</h6>
+        <div class="glass-card p-4">
+            <div class="mb-3">
+                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-database text-success me-2"></i> Database &amp; Backup Settings</h6>
             </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold">Active Database Driver</label>
-                    <input type="text" class="form-control" value="SQLite / MySQL SQLAlchemy Driver" readonly>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label small fw-semibold">Automated Backup Frequency</label>
-                    <select class="form-select">
-                        <option value="daily">Daily at 02:00 UTC</option>
-                        <option value="weekly">Weekly</option>
-                    </select>
-                </div>
-                <div class="p-3 bg-light rounded-3 border mb-3">
-                    <small class="text-muted d-block mb-2">Manual Database Export</small>
-                    <button class="btn btn-outline-success btn-sm w-100 fw-semibold"><i class="fas fa-download me-1"></i> Trigger Instant Database Backup</button>
-                </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Active Database Driver</label>
+                <input type="text" class="form-control" value="SQLite / MySQL SQLAlchemy Driver" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Automated Backup Frequency</label>
+                <select class="form-select">
+                    <option value="daily">Daily at 02:00 UTC</option>
+                    <option value="weekly">Weekly</option>
+                </select>
+            </div>
+            <div class="p-3 rounded-3 mb-3" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                <small class="text-muted d-block mb-2">Manual Database Export</small>
+                <button class="btn btn-outline-success btn-sm w-100 fw-bold"><i class="fas fa-download me-1"></i> Trigger Instant Database Backup</button>
             </div>
         </div>
     </div>

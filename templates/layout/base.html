@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Security Compliance Management System{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3.2 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Custom Glassmorphism CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
     {% block extra_css %}{% endblock %}
 </head>
@@ -16,15 +23,17 @@
     <div id="sidebarOverlay"></div>
 
     <!-- ═══════════════════════════════════
-         SIDEBAR  – Role-Based Navigation (Overlay)
+         SIDEBAR – Role-Based Dark Glass Navigation
     ══════════════════════════════════════ -->
     <nav id="sidebar">
         <div class="sidebar-header">
             <div class="d-flex align-items-center gap-2">
-                <i class="fas fa-shield-halved fa-2x text-info"></i>
+                <div class="p-2 bg-primary bg-opacity-25 text-info rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                    <i class="fas fa-shield-halved fa-lg text-info"></i>
+                </div>
                 <div>
-                    <h6 class="mb-0 fw-bold text-white">SEC-COMPLY</h6>
-                    <small class="text-muted" style="font-size:0.7rem;">Enterprise GRC v2.5</small>
+                    <h6 class="mb-0 fw-bold text-white tracking-wide">SEC-COMPLY</h6>
+                    <small class="text-white-50" style="font-size:0.68rem; letter-spacing: 0.04em;">ENTERPRISE GRC v2.5</small>
                 </div>
             </div>
             <button id="sidebarClose" title="Close menu">
@@ -120,24 +129,24 @@
     ══════════════════════════════════════ -->
     <div id="content">
 
-        <!-- Sticky Top Navbar -->
+        <!-- Glass Top Navbar -->
         <nav class="navbar navbar-expand-lg top-navbar">
             <div class="container-fluid">
-                <button type="button" id="sidebarCollapse" class="btn btn-sm btn-outline-secondary me-3">
+                <button type="button" id="sidebarCollapse" class="btn me-3" title="Toggle Navigation Sidebar">
                     <i class="fas fa-bars"></i>
                 </button>
 
                 <div class="d-none d-md-block me-auto">
-                    <h6 class="mb-0 fw-bold">{% block page_title %}Security Compliance{% endblock %}</h6>
+                    <h6 class="mb-0 fw-bold text-dark">{% block page_title %}Security Compliance{% endblock %}</h6>
                 </div>
 
                 <div class="d-flex align-items-center gap-3">
 
                     <!-- Notification Bell -->
-                    <a href="{{ url_for('notifications') }}" class="btn btn-light position-relative btn-sm rounded-circle">
+                    <a href="{{ url_for('notifications') }}" class="btn btn-glass position-relative p-2 rounded-circle d-flex align-items-center justify-content-center" style="width:38px;height:38px;" title="Notifications">
                         <i class="fas fa-bell text-secondary"></i>
                         {% if unread_notifications_count and unread_notifications_count > 0 %}
-                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm">
                             {{ unread_notifications_count }}
                         </span>
                         {% endif %}
@@ -145,30 +154,33 @@
 
                     <!-- AI Quick Link -->
                     {% if current_user.is_authenticated and current_user.role in ['Super Admin', 'Admin', 'Auditor'] %}
-                    <a href="{{ url_for('ai_studio') }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1">
-                        <i class="fas fa-wand-magic-sparkles text-warning"></i> AI Assistant
+                    <a href="{{ url_for('ai_studio') }}" class="btn btn-sm btn-outline-primary d-flex align-items-center gap-2">
+                        <i class="fas fa-wand-magic-sparkles text-warning"></i> <span class="d-none d-sm-inline">AI Assistant</span>
                     </a>
                     {% endif %}
 
                     <!-- User Dropdown -->
                     <div class="dropdown">
-                        <a class="btn btn-light btn-sm dropdown-toggle d-flex align-items-center gap-2 border"
+                        <a class="btn btn-glass btn-sm dropdown-toggle d-flex align-items-center gap-2 px-3 py-1"
                            href="#" role="button" data-bs-toggle="dropdown">
-                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                                 style="width:28px;height:28px;font-size:0.8rem;">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold"
+                                 style="width:30px;height:30px;font-size:0.85rem; box-shadow: 0 2px 8px rgba(37,99,235,0.3);">
                                 {{ current_user.full_name[0].upper() if current_user.is_authenticated else 'G' }}
                             </div>
-                            <span class="d-none d-sm-inline">
-                                {{ current_user.full_name if current_user.is_authenticated else 'Guest' }}
-                            </span>
+                            <div class="text-start d-none d-sm-block me-1">
+                                <div class="fw-bold text-dark lh-1" style="font-size:0.85rem;">
+                                    {{ current_user.full_name if current_user.is_authenticated else 'Guest' }}
+                                </div>
+                                <small class="text-muted" style="font-size:0.7rem;">{{ current_user.role if current_user.is_authenticated else '' }}</small>
+                            </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-2" style="background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px);">
                             <li class="dropdown-header">
-                                <div class="fw-bold">{{ current_user.full_name if current_user.is_authenticated else 'Guest' }}</div>
+                                <div class="fw-bold text-dark">{{ current_user.full_name if current_user.is_authenticated else 'Guest' }}</div>
                                 <small class="text-muted">{{ current_user.role if current_user.is_authenticated else '' }}</small>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item small" href="{{ url_for('profile') }}"><i class="fas fa-user-circle me-2"></i>My Profile</a></li>
+                            <li><a class="dropdown-item small" href="{{ url_for('profile') }}"><i class="fas fa-user-circle me-2 text-primary"></i>My Profile</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item small text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
                         </ul>
@@ -184,7 +196,8 @@
             {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             {% for category, message in messages %}
-            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show small" role="alert">
+            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show small rounded-3 shadow-sm border-0" role="alert">
+                <i class="fas {% if category == 'success' %}fa-check-circle me-2{% elif category == 'error' or category == 'danger' %}fa-exclamation-triangle me-2{% else %}fa-info-circle me-2{% endif %}"></i>
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -230,12 +243,10 @@
     if (btnClose) btnClose.addEventListener('click', closeSidebar);
     if (overlay)  overlay.addEventListener('click', closeSidebar);
 
-    // Close on Escape key
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeSidebar();
     });
 
-    // Close sidebar when any nav link is clicked (navigate away)
     var navLinks = sidebar ? sidebar.querySelectorAll('a') : [];
     navLinks.forEach(function (link) {
         link.addEventListener('click', closeSidebar);

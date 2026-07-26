@@ -6,26 +6,26 @@
 {% block content %}
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-        <h5 class="fw-bold mb-1">Corporate Security Policies</h5>
+        <h5 class="fw-bold mb-1 text-dark">Corporate Security Policies</h5>
         <p class="text-muted small mb-0">Create, assign, version control, and archive security policy documentation</p>
     </div>
     <div class="d-flex gap-2">
         <input type="text" class="form-control form-control-sm navbar-search table-search-input" data-table-target="policiesTable" placeholder="Search policies by code or title...">
         {% if current_user.role in ['Super Admin', 'Admin'] %}
-        <button class="btn btn-primary btn-sm fw-semibold text-nowrap" data-bs-toggle="modal" data-bs-target="#createPolicyModal">
+        <button class="btn btn-primary btn-sm fw-bold text-nowrap shadow-sm" data-bs-toggle="modal" data-bs-target="#createPolicyModal">
             <i class="fas fa-plus me-1"></i> Create Policy
         </button>
         {% endif %}
     </div>
 </div>
 
-<div class="card border-0 shadow-sm rounded-3">
+<div class="glass-card p-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0" id="policiesTable">
-            <thead class="table-light">
+            <thead>
                 <tr>
                     <th>Policy Code</th>
-                    <th>Title & Category</th>
+                    <th>Title &amp; Category</th>
                     <th>Framework</th>
                     <th>Version</th>
                     <th>Status</th>
@@ -38,28 +38,28 @@
                 <tr>
                     <td class="fw-bold text-primary">{{ p.policy_code }}</td>
                     <td>
-                        <div class="fw-semibold">{{ p.title }}</div>
+                        <div class="fw-bold text-dark">{{ p.title }}</div>
                         <small class="text-muted">{{ p.category or 'General Governance' }}</small>
                     </td>
                     <td>
                         <span class="badge bg-light text-dark border">{{ p.framework.code if p.framework else 'Global' }}</span>
                     </td>
-                    <td><span class="badge bg-secondary bg-opacity-10 text-dark">v{{ p.version }}</span></td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-dark border">v{{ p.version }}</span></td>
                     <td>
                         <span class="badge {% if p.status == 'Active' %}bg-success{% elif p.status == 'Draft' %}bg-warning text-dark{% else %}bg-secondary{% endif %}">
                             {{ p.status }}
                         </span>
                     </td>
-                    <td class="small">{{ p.creator.username if p.creator else 'System Admin' }}</td>
+                    <td class="small text-muted">{{ p.creator.username if p.creator else 'System Admin' }}</td>
                     <td class="text-end">
                         {% if current_user.role in ['Super Admin', 'Admin'] %}
                         <form action="{{ url_for('archive_policy', pid=p.id) }}" method="POST" class="d-inline">
-                            <button type="submit" class="btn btn-sm btn-outline-warning" title="Archive Policy">
+                            <button type="submit" class="btn btn-sm btn-glass text-warning border" title="Archive Policy">
                                 <i class="fas fa-box-archive"></i>
                             </button>
                         </form>
                         {% endif %}
-                        <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewPolicyModal{{ p.id }}" title="View Policy Details">
+                        <button class="btn btn-sm btn-glass text-info border ms-1" data-bs-toggle="modal" data-bs-target="#viewPolicyModal{{ p.id }}" title="View Policy Details">
                             <i class="fas fa-eye"></i>
                         </button>
                     </td>
@@ -70,18 +70,18 @@
                     <div class="modal-dialog modal-lg">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title fw-bold">[{{ p.policy_code }}] {{ p.title }}</h5>
+                                <h5 class="modal-title fw-bold text-dark">[{{ p.policy_code }}] {{ p.title }}</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="row mb-3">
                                     <div class="col-md-4">
                                         <small class="text-muted d-block">Framework Assignment</small>
-                                        <strong>{{ p.framework.name if p.framework else 'Global Governance' }}</strong>
+                                        <strong class="text-dark">{{ p.framework.name if p.framework else 'Global Governance' }}</strong>
                                     </div>
                                     <div class="col-md-4">
                                         <small class="text-muted d-block">Policy Version</small>
-                                        <strong>v{{ p.version }}</strong>
+                                        <strong class="text-dark">v{{ p.version }}</strong>
                                     </div>
                                     <div class="col-md-4">
                                         <small class="text-muted d-block">Current Status</small>
@@ -89,11 +89,11 @@
                                     </div>
                                 </div>
                                 <hr>
-                                <h6 class="fw-bold">Policy Summary & Scope</h6>
-                                <p class="text-secondary">{{ p.description }}</p>
+                                <h6 class="fw-bold text-dark">Policy Summary &amp; Scope</h6>
+                                <p class="text-secondary lh-base">{{ p.description }}</p>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal">Close</button>
                             </div>
                         </div>
                     </div>
@@ -114,14 +114,14 @@
         <div class="modal-content">
             <form action="{{ url_for('create_policy') }}" method="POST">
                 <div class="modal-header">
-                    <h5 class="modal-title fw-bold">Create Security Policy</h5>
+                    <h5 class="modal-title fw-bold text-dark">Create Security Policy</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row g-3">
                         <div class="col-md-8">
                             <label class="form-label small fw-semibold">Policy Title</label>
-                            <input type="text" name="title" class="form-control" placeholder="e.g. Remote Access & VPN Standard" required>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. Remote Access &amp; VPN Standard" required>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-semibold">Policy Code</label>
@@ -140,14 +140,14 @@
                             <input type="text" name="category" class="form-control" placeholder="Access Control / Data Encryption">
                         </div>
                         <div class="col-md-12">
-                            <label class="form-label small fw-semibold">Policy Description & Rules</label>
+                            <label class="form-label small fw-semibold">Policy Description &amp; Rules</label>
                             <textarea name="description" class="form-control" rows="4" placeholder="Detail policy requirements, enforcement rules, and responsibilities..."></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary btn-sm">Save Policy</button>
+                    <button type="button" class="btn btn-glass btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm fw-bold">Save Policy</button>
                 </div>
             </form>
         </div>

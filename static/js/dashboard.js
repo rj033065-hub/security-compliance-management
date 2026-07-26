@@ -1,10 +1,17 @@
-// Dashboard Chart.js Visualizations
+// Glassmorphism Dashboard Chart.js Visualizations v3.0
 document.addEventListener("DOMContentLoaded", function () {
-    // Check if chart elements exist before initializing
-    
+    // Shared Chart.js Font & Style Defaults
+    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+    Chart.defaults.color = '#64748b';
+
     // 1. Compliance Trend Chart (Line Chart)
     const trendCtx = document.getElementById('trendChart');
     if (trendCtx) {
+        const ctx = trendCtx.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.35)');
+        gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+
         new Chart(trendCtx, {
             type: 'line',
             data: {
@@ -13,24 +20,37 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: 'Overall Compliance %',
                     data: [68, 72, 79, 81, 85, 91],
                     borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    backgroundColor: gradient,
                     fill: true,
-                    tension: 0.3,
+                    tension: 0.38,
                     borderWidth: 3,
-                    pointBackgroundColor: '#2563eb'
+                    pointBackgroundColor: '#2563eb',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                        titleFont: { family: "'Plus Jakarta Sans', sans-serif", weight: 'bold' },
+                        padding: 10,
+                        cornerRadius: 8,
+                        displayColors: false
+                    }
                 },
                 scales: {
+                    x: { grid: { display: false } },
                     y: {
                         min: 50,
                         max: 100,
-                        ticks: { callback: value => value + '%' }
+                        ticks: { callback: value => value + '%' },
+                        grid: { color: 'rgba(226, 232, 240, 0.6)' }
                     }
                 }
             }
@@ -48,24 +68,34 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: 'Compliance %',
                     data: [96, 88, 84, 78, 92],
                     backgroundColor: [
-                        '#0d9488',
-                        '#2563eb',
-                        '#6366f1',
-                        '#f59e0b',
-                        '#10b981'
+                        'rgba(37, 99, 235, 0.85)',
+                        'rgba(59, 130, 246, 0.85)',
+                        'rgba(16, 185, 129, 0.85)',
+                        'rgba(245, 158, 11, 0.85)',
+                        'rgba(14, 165, 233, 0.85)'
                     ],
-                    borderRadius: 6
+                    borderRadius: 8,
+                    borderSkipped: false
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
+                        padding: 10,
+                        cornerRadius: 8
+                    }
+                },
                 scales: {
+                    x: { grid: { display: false } },
                     y: {
                         min: 0,
                         max: 100,
-                        ticks: { callback: value => value + '%' }
+                        ticks: { callback: value => value + '%' },
+                        grid: { color: 'rgba(226, 232, 240, 0.6)' }
                     }
                 }
             }
@@ -87,16 +117,20 @@ document.addEventListener("DOMContentLoaded", function () {
                         '#ef4444',
                         '#7f1d1d'
                     ],
-                    borderWidth: 0
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif" }, usePointStyle: true, padding: 15 }
+                    }
                 },
-                cutout: '70%'
+                cutout: '72%'
             }
         });
     }
@@ -114,16 +148,20 @@ document.addEventListener("DOMContentLoaded", function () {
                         '#10b981',
                         '#3b82f6',
                         '#f59e0b',
-                        '#dc2626'
+                        '#ef4444'
                     ],
-                    borderWidth: 0
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif" }, usePointStyle: true, padding: 15 }
+                    }
                 }
             }
         });

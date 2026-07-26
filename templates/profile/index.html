@@ -1,7 +1,7 @@
 {% extends "layout/base.html" %}
 
 {% block title %}My Profile – Security Compliance System{% endblock %}
-{% block page_title %}Account Profile & Security Settings{% endblock %}
+{% block page_title %}Account Profile &amp; Security Settings{% endblock %}
 
 {% block content %}
 <div class="row g-4">
@@ -10,18 +10,18 @@
          LEFT – Profile Card
     ══════════════════════════════════════ -->
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100">
+        <div class="glass-card p-0 overflow-hidden h-100">
             <!-- Banner -->
-            <div style="height:90px; background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);"></div>
+            <div style="height:95px; background: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);"></div>
             <!-- Avatar -->
             <div class="text-center" style="margin-top:-44px;">
-                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold mx-auto shadow border border-4 border-white"
-                     style="width:88px;height:88px;font-size:2rem;">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-extrabold mx-auto border border-4 border-white"
+                     style="width:88px;height:88px;font-size:2rem; box-shadow: 0 8px 24px rgba(37,99,235,0.4);">
                     {{ current_user.full_name[0].upper() if current_user.full_name else 'U' }}
                 </div>
             </div>
             <div class="card-body text-center pt-2 pb-4 px-4">
-                <h5 class="fw-bold mb-0">{{ current_user.full_name }}</h5>
+                <h5 class="fw-bold mb-0 text-dark">{{ current_user.full_name }}</h5>
                 <small class="text-muted">{{ current_user.email }}</small>
 
                 <div class="my-3">
@@ -57,32 +57,32 @@
                     <li class="d-flex align-items-center gap-2 mb-2">
                         <i class="fas fa-id-card text-primary" style="width:18px;"></i>
                         <span class="text-muted">Username:</span>
-                        <strong class="ms-auto">{{ current_user.username }}</strong>
+                        <strong class="ms-auto text-dark">{{ current_user.username }}</strong>
                     </li>
                     <li class="d-flex align-items-center gap-2 mb-2">
                         <i class="fas fa-briefcase text-primary" style="width:18px;"></i>
                         <span class="text-muted">Job Title:</span>
-                        <strong class="ms-auto text-end" style="max-width:140px;">{{ current_user.job_title or '—' }}</strong>
+                        <strong class="ms-auto text-dark text-end" style="max-width:140px;">{{ current_user.job_title or '—' }}</strong>
                     </li>
                     <li class="d-flex align-items-center gap-2 mb-2">
                         <i class="fas fa-building text-primary" style="width:18px;"></i>
                         <span class="text-muted">Department:</span>
-                        <strong class="ms-auto">{{ current_user.department.name if current_user.department else '—' }}</strong>
+                        <strong class="ms-auto text-dark">{{ current_user.department.name if current_user.department else '—' }}</strong>
                     </li>
                     <li class="d-flex align-items-center gap-2 mb-2">
                         <i class="fas fa-phone text-primary" style="width:18px;"></i>
                         <span class="text-muted">Phone:</span>
-                        <strong class="ms-auto">{{ current_user.phone or '—' }}</strong>
+                        <strong class="ms-auto text-dark">{{ current_user.phone or '—' }}</strong>
                     </li>
                     <li class="d-flex align-items-center gap-2 mb-2">
                         <i class="fas fa-calendar-plus text-primary" style="width:18px;"></i>
                         <span class="text-muted">Joined:</span>
-                        <strong class="ms-auto">{{ current_user.created_at.strftime('%d %b %Y') if current_user.created_at else '—' }}</strong>
+                        <strong class="ms-auto text-dark">{{ current_user.created_at.strftime('%d %b %Y') if current_user.created_at else '—' }}</strong>
                     </li>
                     <li class="d-flex align-items-center gap-2">
                         <i class="fas fa-clock text-primary" style="width:18px;"></i>
                         <span class="text-muted">Last Login:</span>
-                        <strong class="ms-auto">{{ current_user.last_login.strftime('%d %b, %H:%M') if current_user.last_login else 'First login' }}</strong>
+                        <strong class="ms-auto text-dark">{{ current_user.last_login.strftime('%d %b, %H:%M') if current_user.last_login else 'First login' }}</strong>
                     </li>
                 </ul>
             </div>
@@ -95,163 +95,157 @@
     <div class="col-lg-8 d-flex flex-column gap-4">
 
         <!-- ── Personal Information ── -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-                <h6 class="fw-bold mb-0">
+        <div class="glass-card p-4">
+            <div class="mb-3">
+                <h6 class="fw-bold mb-0 text-dark">
                     <i class="fas fa-user-pen text-primary me-2"></i> Personal Information
                 </h6>
                 <small class="text-muted">Update your name, job title, and contact details</small>
             </div>
-            <div class="card-body p-4">
-                <form action="{{ url_for('profile') }}" method="POST" id="profileForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">Full Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
-                                <input type="text" name="full_name" class="form-control"
-                                       value="{{ current_user.full_name }}" placeholder="Your full name">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">Email Address</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-envelope text-muted"></i></span>
-                                <input type="email" class="form-control bg-light"
-                                       value="{{ current_user.email }}" disabled>
-                            </div>
-                            <small class="text-muted" style="font-size:0.7rem;">Email cannot be changed here</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">Job Title</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-briefcase text-muted"></i></span>
-                                <input type="text" name="job_title" class="form-control"
-                                       value="{{ current_user.job_title or '' }}" placeholder="e.g. Security Analyst">
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">Phone Number</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-phone text-muted"></i></span>
-                                <input type="text" name="phone" class="form-control"
-                                       value="{{ current_user.phone or '' }}" placeholder="+1-555-0100">
-                            </div>
-                        </div>
-                        <div class="col-12 text-end mt-2">
-                            <button type="submit" name="action" value="profile"
-                                    class="btn btn-primary px-4 fw-semibold">
-                                <i class="fas fa-floppy-disk me-2"></i> Save Profile
-                            </button>
+            <form action="{{ url_for('profile') }}" method="POST" id="profileForm">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Full Name</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user text-muted"></i></span>
+                            <input type="text" name="full_name" class="form-control"
+                                   value="{{ current_user.full_name }}" placeholder="Your full name">
                         </div>
                     </div>
-                </form>
-            </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
+                            <input type="email" class="form-control bg-light"
+                                   value="{{ current_user.email }}" disabled>
+                        </div>
+                        <small class="text-muted" style="font-size:0.7rem;">Email cannot be changed here</small>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Job Title</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-briefcase text-muted"></i></span>
+                            <input type="text" name="job_title" class="form-control"
+                                   value="{{ current_user.job_title or '' }}" placeholder="e.g. Security Analyst">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Phone Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-phone text-muted"></i></span>
+                            <input type="text" name="phone" class="form-control"
+                                   value="{{ current_user.phone or '' }}" placeholder="+1-555-0100">
+                        </div>
+                    </div>
+                    <div class="col-12 text-end mt-2">
+                        <button type="submit" name="action" value="profile"
+                                class="btn btn-primary px-4 fw-bold shadow-sm">
+                            <i class="fas fa-floppy-disk me-2"></i> Save Profile
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
 
         <!-- ── Change Password ── -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-                <h6 class="fw-bold mb-0">
+        <div class="glass-card p-4">
+            <div class="mb-3">
+                <h6 class="fw-bold mb-0 text-dark">
                     <i class="fas fa-lock text-warning me-2"></i> Change Password
                 </h6>
                 <small class="text-muted">Choose a strong password with at least 8 characters</small>
             </div>
-            <div class="card-body p-4">
-                <form action="{{ url_for('profile') }}" method="POST">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">New Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
-                                <input type="password" name="new_password" id="newPwd" class="form-control"
-                                       placeholder="Minimum 8 characters" minlength="8">
-                                <button class="btn btn-outline-secondary" type="button" onclick="togglePwd('newPwd','eyeNew')">
-                                    <i class="fas fa-eye" id="eyeNew"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-secondary">Confirm New Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-light"><i class="fas fa-lock text-muted"></i></span>
-                                <input type="password" name="confirm_password" id="confirmPwd" class="form-control"
-                                       placeholder="Re-enter new password">
-                                <button class="btn btn-outline-secondary" type="button" onclick="togglePwd('confirmPwd','eyeConfirm')">
-                                    <i class="fas fa-eye" id="eyeConfirm"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Password Strength Tips -->
-                        <div class="col-12">
-                            <div class="p-3 rounded-3 bg-light border">
-                                <small class="fw-semibold text-secondary d-block mb-2">
-                                    <i class="fas fa-shield-halved text-primary me-1"></i> Password Requirements
-                                </small>
-                                <div class="row g-1">
-                                    <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> At least 8 characters</small></div>
-                                    <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> Mix of upper &amp; lowercase</small></div>
-                                    <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> At least one number</small></div>
-                                    <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> At least one special character</small></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-12 text-end mt-1">
-                            <button type="submit" class="btn btn-warning px-4 fw-semibold text-white">
-                                <i class="fas fa-key me-2"></i> Update Password
+            <form action="{{ url_for('profile') }}" method="POST">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" name="new_password" id="newPwd" class="form-control"
+                                   placeholder="Minimum 8 characters" minlength="8">
+                            <button class="btn btn-glass border" type="button" onclick="togglePwd('newPwd','eyeNew')">
+                                <i class="fas fa-eye" id="eyeNew"></i>
                             </button>
                         </div>
                     </div>
-                </form>
-            </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold text-secondary">Confirm New Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
+                            <input type="password" name="confirm_password" id="confirmPwd" class="form-control"
+                                   placeholder="Re-enter new password">
+                            <button class="btn btn-glass border" type="button" onclick="togglePwd('confirmPwd','eyeConfirm')">
+                                <i class="fas fa-eye" id="eyeConfirm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Password Strength Tips -->
+                    <div class="col-12">
+                        <div class="p-3 rounded-3" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                            <small class="fw-semibold text-secondary d-block mb-2">
+                                <i class="fas fa-shield-halved text-primary me-1"></i> Password Requirements
+                            </small>
+                            <div class="row g-1">
+                                <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> At least 8 characters</small></div>
+                                <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> Mix of upper &amp; lowercase</small></div>
+                                <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> At least one number</small></div>
+                                <div class="col-6"><small class="text-muted"><i class="fas fa-check text-success me-1"></i> At least one special character</small></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 text-end mt-1">
+                        <button type="submit" class="btn btn-warning px-4 fw-bold text-white shadow-sm">
+                            <i class="fas fa-key me-2"></i> Update Password
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
 
         <!-- ── Account Info (read-only) ── -->
-        <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
-                <h6 class="fw-bold mb-0">
+        <div class="glass-card p-4">
+            <div class="mb-3">
+                <h6 class="fw-bold mb-0 text-dark">
                     <i class="fas fa-circle-info text-info me-2"></i> Account Information
                 </h6>
                 <small class="text-muted">System-managed account metadata (read-only)</small>
             </div>
-            <div class="card-body p-4">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="p-3 bg-light rounded-3 border text-center">
-                            <div class="text-muted small mb-1">Account Role</div>
-                            <div class="fw-bold text-primary">{{ current_user.role }}</div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                        <div class="text-muted small mb-1">Account Role</div>
+                        <div class="fw-bold text-primary">{{ current_user.role }}</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                        <div class="text-muted small mb-1">Account Status</div>
+                        <div class="fw-bold {{ 'text-success' if current_user.status == 'Active' else 'text-danger' }}">
+                            {{ current_user.status }}
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="p-3 bg-light rounded-3 border text-center">
-                            <div class="text-muted small mb-1">Account Status</div>
-                            <div class="fw-bold {{ 'text-success' if current_user.status == 'Active' else 'text-danger' }}">
-                                {{ current_user.status }}
-                            </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                        <div class="text-muted small mb-1">Username</div>
+                        <div class="fw-bold text-dark font-monospace">{{ current_user.username }}</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                        <div class="text-muted small mb-1">Account Created</div>
+                        <div class="fw-bold text-dark">
+                            {{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else '—' }}
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="p-3 bg-light rounded-3 border text-center">
-                            <div class="text-muted small mb-1">Username</div>
-                            <div class="fw-bold text-dark font-monospace">{{ current_user.username }}</div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded-3 border text-center">
-                            <div class="text-muted small mb-1">Account Created</div>
-                            <div class="fw-bold text-dark">
-                                {{ current_user.created_at.strftime('%B %d, %Y') if current_user.created_at else '—' }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="p-3 bg-light rounded-3 border text-center">
-                            <div class="text-muted small mb-1">Last Login</div>
-                            <div class="fw-bold text-dark">
-                                {{ current_user.last_login.strftime('%B %d, %Y at %H:%M') if current_user.last_login else 'First session' }}
-                            </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="p-3 rounded-3 text-center" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                        <div class="text-muted small mb-1">Last Login</div>
+                        <div class="fw-bold text-dark">
+                            {{ current_user.last_login.strftime('%B %d, %Y at %H:%M') if current_user.last_login else 'First session' }}
                         </div>
                     </div>
                 </div>

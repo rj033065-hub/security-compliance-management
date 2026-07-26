@@ -3,7 +3,7 @@
 {% block title %}Register - Security Compliance System{% endblock %}
 
 {% block content %}
-<h5 class="fw-bold mb-3 text-secondary text-center">Create Employee Account</h5>
+<h5 class="fw-bold mb-3 text-dark text-center">Create Employee Account</h5>
 
 <form action="{{ url_for('register') }}" method="POST">
     <div class="mb-3">
@@ -36,7 +36,7 @@
         <input type="password" name="password" class="form-control" placeholder="Minimum 8 characters" required minlength="8">
     </div>
 
-    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mb-3">Register Account</button>
+    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold mb-3">Register Account</button>
 </form>
 
 <div class="text-center border-top pt-3">

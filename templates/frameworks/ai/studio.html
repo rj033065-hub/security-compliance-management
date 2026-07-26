@@ -1,12 +1,12 @@
 {% extends "layout/base.html" %}
 
 {% block title %}AI Studio - Security Compliance System{% endblock %}
-{% block page_title %}AI Compliance & Intelligence Studio{% endblock %}
+{% block page_title %}AI Compliance &amp; Intelligence Studio{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h5 class="fw-bold mb-1"><i class="fas fa-wand-magic-sparkles text-warning me-2"></i> AI Compliance Intelligence Hub</h5>
+        <h5 class="fw-bold mb-1 text-dark"><i class="fas fa-wand-magic-sparkles text-warning me-2"></i> AI Compliance Intelligence Hub</h5>
         <p class="text-muted small mb-0">Automated gap detection, AI policy generator, risk digest, and interactive GRC assistant</p>
     </div>
 </div>
@@ -14,9 +14,9 @@
 <div class="row g-4">
     <!-- Interactive Chatbot Widget -->
     <div class="col-lg-6">
-        <div class="card ai-assistant-card shadow-sm h-100 p-4">
-            <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-secondary">
-                <div class="p-3 bg-info bg-opacity-20 rounded-circle text-info">
+        <div class="ai-assistant-card h-100 p-4">
+            <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom border-white border-opacity-10">
+                <div class="p-3 bg-info bg-opacity-20 rounded-circle text-info border border-info border-opacity-25" style="box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);">
                     <i class="fas fa-robot fa-2x"></i>
                 </div>
                 <div>
@@ -36,7 +36,7 @@
 
             <!-- Chat Input Form -->
             <form id="aiChatForm" class="d-flex gap-2">
-                <input type="text" id="aiQueryInput" class="form-control bg-dark text-white border-secondary" placeholder="Ask AI e.g. How to comply with PCI DSS Requirement 3?" required>
+                <input type="text" id="aiQueryInput" class="form-control bg-dark bg-opacity-50 text-white border-secondary" placeholder="Ask AI e.g. How to comply with PCI DSS Requirement 3?" required>
                 <button type="submit" class="btn btn-info text-dark fw-bold px-3"><i class="fas fa-paper-plane"></i></button>
             </form>
         </div>
@@ -45,23 +45,23 @@
     <!-- AI Gap Analysis & Policy Generator -->
     <div class="col-lg-6">
         <!-- AI Missing Controls Spotlight -->
-        <div class="card border-0 shadow-sm rounded-3 mb-4">
-            <div class="card-header bg-white py-3">
-                <h6 class="fw-bold mb-0 text-danger"><i class="fas fa-triangle-exclamation me-2"></i> AI Missing Controls & Gap Detector</h6>
+        <div class="glass-card mb-4">
+            <div class="p-3 border-bottom">
+                <h6 class="fw-bold mb-0 text-danger"><i class="fas fa-triangle-exclamation me-2"></i> AI Missing Controls &amp; Gap Detector</h6>
             </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush small">
+            <div class="p-3">
+                <ul class="list-group list-group-flush small bg-transparent">
                     {% for m in missing_controls %}
-                    <li class="list-group-item px-0">
+                    <li class="list-group-item px-0 bg-transparent">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <strong class="text-dark">[{{ m.code }}] {{ m.name }}</strong>
                             <span class="badge badge-risk-high">{{ m.risk_level }} Risk</span>
                         </div>
                         <p class="text-secondary mb-1" style="font-size: 0.825rem;">{{ m.recommendation }}</p>
-                        <small class="text-primary"><i class="fas fa-arrow-right me-1"></i> Suggested Action: {{ m.suggested_task }}</small>
+                        <small class="text-primary fw-semibold"><i class="fas fa-arrow-right me-1"></i> Suggested Action: {{ m.suggested_task }}</small>
                     </li>
                     {% else %}
-                    <li class="list-group-item px-0 text-success fw-semibold">
+                    <li class="list-group-item px-0 bg-transparent text-success fw-semibold">
                         <i class="fas fa-check-circle me-1"></i> No missing control gaps detected across active frameworks!
                     </li>
                     {% endfor %}
@@ -70,13 +70,13 @@
         </div>
 
         <!-- AI Executive Risk Summary Digest -->
-        <div class="card border-0 shadow-sm rounded-3">
-            <div class="card-header bg-white py-3">
+        <div class="glass-card">
+            <div class="p-3 border-bottom">
                 <h6 class="fw-bold mb-0 text-primary"><i class="fas fa-file-invoice me-2"></i> AI Executive Risk Digest</h6>
             </div>
-            <div class="card-body">
-                <div class="p-3 bg-light rounded-3 border">
-                    <p class="small mb-0 text-secondary" style="line-height: 1.6;">
+            <div class="p-3">
+                <div class="p-3 rounded-3" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
+                    <p class="small mb-0 text-secondary lh-base">
                         {{ ai_risk_summary }}
                     </p>
                 </div>
