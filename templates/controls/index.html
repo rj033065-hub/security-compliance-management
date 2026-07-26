@@ -1,0 +1,132 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Controls - Security Compliance System{% endblock %}
+{% block page_title %}Security Controls Catalogue{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">Security Controls Catalogue</h5>
+        <p class="text-muted small mb-0">Track risk severity and implementation status across security controls</p>
+    </div>
+    <div class="d-flex gap-2">
+        <input type="text" class="form-control form-control-sm navbar-search table-search-input" data-table-target="controlsTable" placeholder="Filter controls by code or name...">
+        {% if current_user.role in ['Super Admin', 'Admin'] %}
+        <button class="btn btn-primary btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#createControlModal">
+            <i class="fas fa-plus me-1"></i> Add Control
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0" id="controlsTable">
+            <thead class="table-light">
+                <tr>
+                    <th>Control Code</th>
+                    <th>Control Name</th>
+                    <th>Framework</th>
+                    <th>Category</th>
+                    <th>Risk Severity</th>
+                    <th>Implementation Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in controls %}
+                <tr>
+                    <td class="fw-bold text-primary">{{ c.control_code }}</td>
+                    <td>
+                        <div class="fw-semibold">{{ c.name }}</div>
+                        <small class="text-muted">{{ c.description[:60] if c.description else '' }}...</small>
+                    </td>
+                    <td>
+                        <span class="badge bg-light text-dark border">{{ c.framework.name if c.framework else 'Global' }}</span>
+                    </td>
+                    <td class="small">{{ c.category or 'Technical' }}</td>
+                    <td>
+                        <span class="badge {% if c.risk_level == 'Critical' %}badge-risk-critical{% elif c.risk_level == 'High' %}badge-risk-high{% elif c.risk_level == 'Medium' %}badge-risk-medium{% else %}badge-risk-low{% endif %}">
+                            {{ c.risk_level }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge {% if c.status == 'Implemented' %}badge-implemented{% elif c.status == 'Partial' %}badge-partial{% else %}badge-not-implemented{% endif %}">
+                            {{ c.status }}
+                        </span>
+                    </td>
+                    <td class="text-end">
+                        {% if current_user.role in ['Super Admin', 'Admin'] %}
+                        <form action="{{ url_for('update_control_status', cid=c.id) }}" method="POST" class="d-inline">
+                            <select name="status" class="form-select form-select-sm d-inline-block w-auto" onchange="this.form.submit()">
+                                <option value="Implemented" {% if c.status == 'Implemented' %}selected{% endif %}>Implemented</option>
+                                <option value="Partial" {% if c.status == 'Partial' %}selected{% endif %}>Partial</option>
+                                <option value="Not Implemented" {% if c.status == 'Not Implemented' %}selected{% endif %}>Not Implemented</option>
+                            </select>
+                        </form>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">No security controls configured.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Control Modal -->
+<div class="modal fade" id="createControlModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('create_control') }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Add Security Control</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Framework</label>
+                        <select name="framework_id" class="form-select" required>
+                            {% for fw in frameworks %}
+                            <option value="{{ fw.id }}">{{ fw.name }} ({{ fw.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Control Code</label>
+                        <input type="text" name="control_code" class="form-control" placeholder="e.g. A.8.24" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Control Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g. Disk Encryption Enforced" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Category</label>
+                        <input type="text" name="category" class="form-control" placeholder="Endpoint Protection / Access Control">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Risk Level</label>
+                        <select name="risk_level" class="form-select">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Description</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="Explain technical and administrative requirements..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Save Control</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

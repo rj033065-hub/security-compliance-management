@@ -1,0 +1,195 @@
+{% extends "layout/base.html" %}
+
+{% block title %}Risk Assessment - Security Compliance System{% endblock %}
+{% block page_title %}Risk Assessment & Interactive Heatmap{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h5 class="fw-bold mb-1">5x5 Enterprise Risk Matrix & Heatmap</h5>
+        <p class="text-muted small mb-0">Evaluate Likelihood (1-5) x Impact (1-5) to calculate risk severity scores</p>
+    </div>
+    {% if current_user.role in ['Super Admin', 'Admin', 'Auditor'] %}
+    <button class="btn btn-danger btn-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#createRiskModal">
+        <i class="fas fa-plus me-1"></i> New Risk Assessment
+    </button>
+    {% endif %}
+</div>
+
+<!-- 5x5 Interactive Risk Heatmap Matrix -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm rounded-3">
+            <div class="card-header bg-white py-3">
+                <h6 class="fw-bold mb-0"><i class="fas fa-grip text-primary me-2"></i> Likelihood vs. Impact Risk Matrix Grid</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="heatmap-table">
+                        <thead>
+                            <tr>
+                                <th class="text-muted small text-center" style="width: 100px;">Likelihood \ Impact</th>
+                                <th class="text-center small">1 - Insignificant</th>
+                                <th class="text-center small">2 - Minor</th>
+                                <th class="text-center small">3 - Moderate</th>
+                                <th class="text-center small">4 - Major</th>
+                                <th class="text-center small">5 - Catastrophic</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for l in [5, 4, 3, 2, 1] %}
+                            <tr>
+                                <td class="fw-bold small text-muted text-center">
+                                    {% if l == 5 %}5 - Almost Certain{% elif l == 4 %}4 - Likely{% elif l == 3 %}3 - Possible{% elif l == 2 %}2 - Unlikely{% else %}1 - Rare{% endif %}
+                                </td>
+                                {% for i in [1, 2, 3, 4, 5] %}
+                                    {% set score = l * i %}
+                                    {% set level = 'Low' if score <= 5 else ('Medium' if score <= 12 else ('High' if score <= 19 else 'Critical')) %}
+                                    <td>
+                                        <div class="heatmap-cell level-{{ level|lower }}" title="Score: {{ score }} ({{ level }})">
+                                            <span>{{ score }}</span>
+                                            <span style="font-size: 0.65rem;">{{ level }}</span>
+                                        </div>
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Summary KPI Sidebar -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm rounded-3 h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="fw-bold mb-0"><i class="fas fa-shield-virus text-danger me-2"></i> High-Risk Control Recommendations</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush small mb-3">
+                    {% for r in risks if r.risk_level in ['High', 'Critical'] %}
+                    <li class="list-group-item px-0">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <strong class="text-dark">{{ r.title }}</strong>
+                            <span class="badge {% if r.risk_level == 'Critical' %}badge-risk-critical{% else %}badge-risk-high{% endif %}">
+                                Score {{ r.risk_score }} &bull; {{ r.risk_level }}
+                            </span>
+                        </div>
+                        <small class="text-muted d-block mb-1">Scope: {{ r.asset_scope or 'General' }}</small>
+                        <p class="mb-0 text-secondary" style="font-size: 0.8rem;">
+                            <strong>Mitigation:</strong> {{ r.mitigations or 'No mitigation recorded.' }}
+                        </p>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item px-0 text-muted">No Critical/High risks identified currently.</li>
+                    {% endfor %}
+                </ul>
+
+                <div class="p-3 bg-light rounded-3 border">
+                    <h6 class="fw-bold small mb-1 text-primary"><i class="fas fa-lightbulb me-1"></i> AI Risk Mitigation Rule</h6>
+                    <small class="text-muted">Risks scoring &ge; 20 require mandatory escalation to CISO and 7-day remediation SLA.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Risk Register Table -->
+<div class="card border-0 shadow-sm rounded-3">
+    <div class="card-header bg-white py-3">
+        <h6 class="fw-bold mb-0"><i class="fas fa-list-check me-2"></i> Comprehensive Risk Register</h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Risk Title</th>
+                    <th>Asset / Scope</th>
+                    <th>Likelihood</th>
+                    <th>Impact</th>
+                    <th>Risk Score</th>
+                    <th>Risk Severity</th>
+                    <th>Assessed By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in risks %}
+                <tr>
+                    <td class="fw-semibold">{{ r.title }}</td>
+                    <td class="small text-muted">{{ r.asset_scope or 'General System' }}</td>
+                    <td class="text-center">{{ r.likelihood }} / 5</td>
+                    <td class="text-center">{{ r.impact }} / 5</td>
+                    <td class="fw-bold text-center">{{ r.risk_score }}</td>
+                    <td>
+                        <span class="badge {% if r.risk_level == 'Critical' %}badge-risk-critical{% elif r.risk_level == 'High' %}badge-risk-high{% elif r.risk_level == 'Medium' %}badge-risk-medium{% else %}badge-risk-low{% endif %}">
+                            {{ r.risk_level }}
+                        </span>
+                    </td>
+                    <td class="small">{{ r.assessor.username if r.assessor else 'System Admin' }}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">No risk assessments created yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Risk Assessment Modal -->
+<div class="modal fade" id="createRiskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('create_risk') }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">Add Risk Assessment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Risk Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g. Unpatched OS Vulnerabilities" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Asset / Scope</label>
+                        <input type="text" name="asset_scope" class="form-control" placeholder="Workstations / AWS Production Cluster">
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Likelihood (1 - 5)</label>
+                            <select name="likelihood" class="form-select" required>
+                                <option value="1">1 - Rare</option>
+                                <option value="2">2 - Unlikely</option>
+                                <option value="3" selected>3 - Possible</option>
+                                <option value="4">4 - Likely</option>
+                                <option value="5">5 - Almost Certain</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-semibold">Impact (1 - 5)</label>
+                            <select name="impact" class="form-select" required>
+                                <option value="1">1 - Insignificant</option>
+                                <option value="2">2 - Minor</option>
+                                <option value="3" selected>3 - Moderate</option>
+                                <option value="4">4 - Major</option>
+                                <option value="5">5 - Catastrophic</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mitigation Strategy</label>
+                        <textarea name="mitigations" class="form-control" rows="3" placeholder="Describe technical controls or compensating safeguards..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Calculate & Save Risk</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
