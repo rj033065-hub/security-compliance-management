@@ -13,7 +13,8 @@
     <!-- FontAwesome 6 Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <!-- Custom Glassmorphism CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}?v=3.0">
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=3.0" defer></script>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
