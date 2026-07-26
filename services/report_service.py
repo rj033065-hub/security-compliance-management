@@ -1,6 +1,8 @@
 import io
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
+from openpyxl.cell.cell import MergedCell
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -106,11 +108,27 @@ class ReportGenerator:
                 a.final_status
             ])
 
-        # Auto adjust column widths
+        # Auto adjust column widths safely
         for sheet in wb.worksheets:
             for col in sheet.columns:
-                max_len = max(len(str(cell.value or '')) for cell in col)
-                col_letter = col[0].column_letter
+                col_letter = get_column_letter(col[0].column)
+                valid_lengths = []
+                for cell in col:
+                    if isinstance(cell, MergedCell):
+                        continue
+                    if sheet.merged_cells:
+                        is_in_merged = False
+                        for m_range in sheet.merged_cells.ranges:
+                            if cell.coordinate in m_range and (m_range.min_col != m_range.max_col):
+                                is_in_merged = True
+                                break
+                        if is_in_merged:
+                            continue
+                    val_str = str(cell.value or '')
+                    if val_str:
+                        valid_lengths.append(len(val_str))
+
+                max_len = max(valid_lengths) if valid_lengths else 10
                 sheet.column_dimensions[col_letter].width = max(max_len + 3, 12)
                 
         stream = io.BytesIO()
