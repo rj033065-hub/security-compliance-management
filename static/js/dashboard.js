@@ -1,21 +1,21 @@
-// Security Command Center - Chart.js Visualizations v4.0
-// Warm Graphite Palette (#161310) with Burnt Orange (#E37318) and IBM Plex Typography
+// Security Command Center - Chart.js Visualizations v5.0
+// Clean Light Theme Palette (#F7F8FA / #FFFFFF) with Deep Cobalt Blue (#2454E0) and IBM Plex Typography
 
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof Chart === 'undefined') return;
 
     // Shared Chart.js Font & Style Defaults
     Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
-    Chart.defaults.color = '#A89985';
-    Chart.defaults.borderColor = '#3B3227';
+    Chart.defaults.color = '#5B6577';
+    Chart.defaults.borderColor = '#DFE3EA';
 
     // 1. Compliance Trend Chart (Line Chart)
     const trendCtx = document.getElementById('trendChart');
     if (trendCtx) {
         const ctx = trendCtx.getContext('2d');
         const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-        gradient.addColorStop(0, 'rgba(227, 115, 24, 0.4)');
-        gradient.addColorStop(1, 'rgba(227, 115, 24, 0.0)');
+        gradient.addColorStop(0, 'rgba(36, 84, 224, 0.3)');
+        gradient.addColorStop(1, 'rgba(36, 84, 224, 0.0)');
 
         new Chart(trendCtx, {
             type: 'line',
@@ -24,13 +24,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     label: 'Overall Compliance %',
                     data: [68, 72, 79, 81, 85, 91],
-                    borderColor: '#E37318',
+                    borderColor: '#2454E0',
                     backgroundColor: gradient,
                     fill: true,
                     tension: 0.38,
                     borderWidth: 3,
-                    pointBackgroundColor: '#E37318',
-                    pointBorderColor: '#EDE6D9',
+                    pointBackgroundColor: '#2454E0',
+                    pointBorderColor: '#FFFFFF',
                     pointBorderWidth: 2,
                     pointRadius: 5,
                     pointHoverRadius: 7
@@ -46,11 +46,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#221C16',
-                        borderColor: '#3B3227',
+                        backgroundColor: '#10162B',
+                        borderColor: '#DFE3EA',
                         borderWidth: 1,
-                        titleColor: '#EDE6D9',
-                        bodyColor: '#A89985',
+                        titleColor: '#FFFFFF',
+                        bodyColor: '#DFE3EA',
                         titleFont: { family: "'IBM Plex Mono', monospace", weight: 'bold' },
                         padding: 12,
                         cornerRadius: 8,
@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 scales: {
                     x: {
-                        grid: { color: 'rgba(59, 50, 39, 0.4)' },
+                        grid: { color: 'rgba(223, 227, 234, 0.5)' },
                         ticks: { font: { family: "'IBM Plex Mono', monospace" } }
                     },
                     y: {
@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             callback: value => value + '%',
                             font: { family: "'IBM Plex Mono', monospace" }
                         },
-                        grid: { color: 'rgba(59, 50, 39, 0.4)' }
+                        grid: { color: 'rgba(223, 227, 234, 0.5)' }
                     }
                 }
             }
@@ -87,11 +87,11 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: 'Compliance %',
                     data: [96, 88, 84, 78, 92],
                     backgroundColor: [
-                        'rgba(227, 115, 24, 0.9)',
-                        'rgba(201, 162, 39, 0.9)',
-                        'rgba(124, 154, 87, 0.9)',
-                        'rgba(168, 153, 133, 0.9)',
-                        'rgba(227, 115, 24, 0.7)'
+                        'rgba(36, 84, 224, 0.9)',
+                        'rgba(183, 121, 31, 0.9)',
+                        'rgba(63, 143, 95, 0.9)',
+                        'rgba(91, 101, 119, 0.8)',
+                        'rgba(36, 84, 224, 0.7)'
                     ],
                     borderRadius: 6,
                     borderSkipped: false
@@ -107,8 +107,8 @@ document.addEventListener("DOMContentLoaded", function () {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#221C16',
-                        borderColor: '#3B3227',
+                        backgroundColor: '#10162B',
+                        borderColor: '#DFE3EA',
                         borderWidth: 1,
                         padding: 12,
                         cornerRadius: 8
@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", function () {
                             callback: value => value + '%',
                             font: { family: "'IBM Plex Mono', monospace" }
                         },
-                        grid: { color: 'rgba(59, 50, 39, 0.4)' }
+                        grid: { color: 'rgba(223, 227, 234, 0.5)' }
                     }
                 }
             }
@@ -143,13 +143,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     data: [4, 6, 3, 1],
                     backgroundColor: [
-                        '#7C9A57',  // Low - Green
-                        '#C9A227',  // Medium - Amber
-                        '#E37318',  // High - Orange
-                        '#BD4234'   // Critical - Red
+                        '#3F8F5F',  // Low - Emerald Green
+                        '#B7791F',  // Medium - Amber
+                        '#2454E0',  // High - Cobalt Blue
+                        '#C1443A'   // Critical - Crimson Red
                     ],
                     borderWidth: 2,
-                    borderColor: '#221C16'
+                    borderColor: '#FFFFFF'
                 }]
             },
             options: {
@@ -164,15 +164,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#EDE6D9',
+                            color: '#10162B',
                             font: { family: "'IBM Plex Mono', monospace", size: 12 },
                             usePointStyle: true,
                             padding: 16
                         }
                     },
                     tooltip: {
-                        backgroundColor: '#221C16',
-                        borderColor: '#3B3227',
+                        backgroundColor: '#10162B',
+                        borderColor: '#DFE3EA',
                         borderWidth: 1,
                         padding: 10
                     }
@@ -192,13 +192,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     data: [14, 4, 6, 2],
                     backgroundColor: [
-                        '#7C9A57',
-                        '#E37318',
-                        '#C9A227',
-                        '#BD4234'
+                        '#3F8F5F',
+                        '#2454E0',
+                        '#B7791F',
+                        '#C1443A'
                     ],
                     borderWidth: 2,
-                    borderColor: '#221C16'
+                    borderColor: '#FFFFFF'
                 }]
             },
             options: {
@@ -212,15 +212,15 @@ document.addEventListener("DOMContentLoaded", function () {
                     legend: {
                         position: 'bottom',
                         labels: {
-                            color: '#EDE6D9',
+                            color: '#10162B',
                             font: { family: "'IBM Plex Mono', monospace", size: 12 },
                             usePointStyle: true,
                             padding: 16
                         }
                     },
                     tooltip: {
-                        backgroundColor: '#221C16',
-                        borderColor: '#3B3227',
+                        backgroundColor: '#10162B',
+                        borderColor: '#DFE3EA',
                         borderWidth: 1,
                         padding: 10
                     }

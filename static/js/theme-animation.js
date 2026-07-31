@@ -1,6 +1,6 @@
 /**
- * Security Command Center - Unified Animation System & Interactive Utilities
- * Theme: Warm Graphite Command Center (#161310) with Burnt Orange Accents (#E37318)
+ * Security Command Center - Unified Light Theme Animation System & Utilities
+ * Theme: Light Background (#F7F8FA) with Deep Cobalt Blue Accents (#2454E0) & Dark Navy Text (#10162B)
  */
 
 (function () {
@@ -10,7 +10,7 @@
     const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // ══════════════════════════════════════════════════════════════════
-    // 1. MESH BACKGROUND CANVAS (Mouse-reactive node network)
+    // 1. MESH BACKGROUND CANVAS (Light Theme: Dark Navy dots, blue lines, red/orange cursor flash)
     // ══════════════════════════════════════════════════════════════════
     class MeshBackground {
         constructor(canvasId, options = {}) {
@@ -21,8 +21,11 @@
             this.nodeCount = options.nodeCount || parseInt(this.canvas.getAttribute("data-nodes") || "40", 10);
             this.maxDistance = options.maxDistance || 140;
             this.mouseRadius = options.mouseRadius || 180;
-            this.nodeColor = options.nodeColor || "rgba(227, 115, 24, 0.4)";  // Burnt orange nodes
-            this.lineColor = options.lineColor || "rgba(59, 50, 39, 0.35)";    // Warm line connections
+
+            // Light theme colors
+            this.nodeColor = options.nodeColor || "rgba(16, 22, 43, 0.65)";        // Dark navy dots
+            this.lineColor = options.lineColor || "rgba(36, 84, 224, 0.22)";        // Faint cobalt blue lines
+            this.cursorLineColor = "rgba(227, 115, 24, 0.85)";                      // Orange/red contrast flash near cursor
             this.speedMult = options.speed || 0.4;
 
             this.nodes = [];
@@ -80,9 +83,7 @@
                     y: Math.random() * this.height,
                     vx: (Math.random() - 0.5) * this.speedMult,
                     vy: (Math.random() - 0.5) * this.speedMult,
-                    radius: Math.random() * 2 + 1.2,
-                    originX: 0,
-                    originY: 0
+                    radius: Math.random() * 2 + 1.2
                 });
             }
         }
@@ -104,6 +105,8 @@
                 if (node.x < 0 || node.x > this.width) node.vx *= -1;
                 if (node.y < 0 || node.y > this.height) node.vy *= -1;
 
+                let isNearCursor = false;
+
                 // Mouse attraction/repulsion
                 if (this.mouse.active) {
                     const dx = this.mouse.x - node.x;
@@ -111,6 +114,7 @@
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist < this.mouseRadius) {
+                        isNearCursor = true;
                         const force = (this.mouseRadius - dist) / this.mouseRadius;
                         node.x -= (dx / dist) * force * 1.5;
                         node.y -= (dy / dist) * force * 1.5;
@@ -120,7 +124,7 @@
                 // Draw Node Point
                 this.ctx.beginPath();
                 this.ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-                this.ctx.fillStyle = this.nodeColor;
+                this.ctx.fillStyle = isNearCursor ? "#C1443A" : this.nodeColor;
                 this.ctx.fill();
 
                 // Connect nearby nodes
@@ -135,8 +139,14 @@
                         this.ctx.beginPath();
                         this.ctx.moveTo(node.x, node.y);
                         this.ctx.lineTo(node2.x, node2.y);
-                        this.ctx.strokeStyle = `rgba(227, 115, 24, ${alpha})`;
-                        this.ctx.lineWidth = 0.8;
+                        
+                        if (isNearCursor) {
+                            this.ctx.strokeStyle = `rgba(227, 115, 24, ${alpha + 0.3})`;
+                            this.ctx.lineWidth = 1.2;
+                        } else {
+                            this.ctx.strokeStyle = `rgba(36, 84, 224, ${alpha})`;
+                            this.ctx.lineWidth = 0.8;
+                        }
                         this.ctx.stroke();
                     }
                 }
@@ -185,9 +195,8 @@
             });
         }, { threshold: 0.12 });
 
-        revealElements.forEach((el, idx) => {
+        revealElements.forEach((el) => {
             if (!el.hasAttribute("data-stagger")) {
-                // Auto stagger siblings if inside a grid row
                 const parent = el.closest(".row");
                 if (parent) {
                     const children = Array.from(parent.children);
@@ -252,7 +261,6 @@
 
                         if (!isNaN(rawNum) && rawNum > 0) {
                             animateNumber(el, 0, rawNum, prefix, suffix, duration, () => {
-                                // Enable Live Flicker mode if requested or if it's a key metric
                                 if (el.hasAttribute("data-flicker") || el.innerText.includes("%") || el.closest(".kpi-card")) {
                                     startLiveFlicker(el, rawNum, prefix, suffix);
                                 }
@@ -280,7 +288,6 @@
         function update(now) {
             const elapsed = now - startTime;
             const progress = Math.min(elapsed / duration, 1);
-            // Ease out cubic
             const easeProgress = 1 - Math.pow(1 - progress, 3);
             const current = start + (end - start) * easeProgress;
 
@@ -298,10 +305,9 @@
     }
 
     function startLiveFlicker(el, baseVal, prefix, suffix) {
-        // Jitter ±1 periodically
         setInterval(() => {
             if (document.hidden) return;
-            if (Math.random() > 0.4) return; // 40% chance every cycle
+            if (Math.random() > 0.4) return;
 
             const delta = Math.random() > 0.5 ? 1 : -1;
             const flickerVal = Math.max(0, baseVal + delta);
@@ -318,7 +324,7 @@
     }
 
     // ══════════════════════════════════════════════════════════════════
-    // 5. TYPEWRITER UTILITY (Hero subheadings, taglines, empty states)
+    // 5. TYPEWRITER UTILITY
     // ══════════════════════════════════════════════════════════════════
     function initTypewriter() {
         const typewriterElems = document.querySelectorAll("[data-typewriter]");
@@ -359,7 +365,7 @@
                 let currentSpeed = isDeleting ? speed / 2 : speed;
 
                 if (!isDeleting && charIdx === currentPhrase.length) {
-                    if (phrases.length === 1) return; // Stop if single phrase
+                    if (phrases.length === 1) return;
                     currentSpeed = delay;
                     isDeleting = true;
                 } else if (isDeleting && charIdx === 0) {
@@ -388,7 +394,6 @@
         const activeLi = navList.querySelector("li.active");
         if (!activeLi) return;
 
-        // Create indicator bar element
         let indicator = sidebar.querySelector(".sidebar-active-indicator");
         if (!indicator) {
             indicator = document.createElement("div");
@@ -405,8 +410,6 @@
         }
 
         updateIndicatorPos(activeLi);
-
-        // Update position on window resize / sidebar scroll
         sidebar.addEventListener("scroll", () => updateIndicatorPos(activeLi));
         window.addEventListener("resize", () => updateIndicatorPos(activeLi));
     }
@@ -420,10 +423,8 @@
         forms.forEach(form => {
             const inputs = form.querySelectorAll(".form-control, .form-select");
             inputs.forEach(input => {
-                // Wrap in input-group helper if not already wrapped
                 const group = input.closest(".input-group");
                 if (group) {
-                    // Checkmark container
                     if (!group.querySelector(".input-valid-icon")) {
                         const checkSpan = document.createElement("span");
                         checkSpan.className = "input-valid-icon";
@@ -443,25 +444,21 @@
                     }
                 });
 
-                input.addEventListener("invalid", function (e) {
+                input.addEventListener("invalid", function () {
                     this.classList.add("is-invalid");
                     this.classList.add("shake-error");
                     setTimeout(() => this.classList.remove("shake-error"), 600);
                 });
             });
 
-            // Form Submit Inline Loading
-            form.addEventListener("submit", function (e) {
+            form.addEventListener("submit", function () {
                 const btn = form.querySelector("button[type='submit']");
                 if (!btn || btn.classList.contains("btn-loading")) return;
 
                 if (!form.checkValidity()) return;
 
-                const origHtml = btn.innerHTML;
                 btn.classList.add("btn-loading");
                 btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status"></span> Authentic & Processing...`;
-
-                // If demo or normal submit, let form post
             });
         });
     }
@@ -483,12 +480,12 @@
                     cell.style.transition = "opacity 0.4s ease, transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
                     cell.style.opacity = "1";
                     cell.style.transform = "scale(1)";
-                }, 100 + idx * 45); // Row by row stagger
+                }, 100 + idx * 45);
             }
 
             cell.addEventListener("mouseenter", function () {
-                this.style.transform = "scale(1.12) z-index(10)";
-                this.style.boxShadow = "0 8px 20px rgba(0, 0, 0, 0.35)";
+                this.style.transform = "scale(1.12)";
+                this.style.boxShadow = "0 8px 20px rgba(16, 22, 43, 0.18)";
             });
 
             cell.addEventListener("mouseleave", function () {
@@ -502,7 +499,6 @@
     // DOM READY INITIALIZATION
     // ══════════════════════════════════════════════════════════════════
     document.addEventListener("DOMContentLoaded", () => {
-        // Instantiate Mesh Background on hero or auth cards if canvas present
         if (document.getElementById("meshCanvas")) {
             new MeshBackground("meshCanvas", { nodeCount: 65, maxDistance: 130 });
         }

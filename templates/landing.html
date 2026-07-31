@@ -12,8 +12,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}?v=4.0">
-    <script src="{{ url_for('static', filename='js/theme-animation.js') }}?v=4.0" defer></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}?v=5.0">
+    <script src="{{ url_for('static', filename='js/theme-animation.js') }}?v=5.0" defer></script>
     <style>
         .hero-glass {
             background: var(--bg);
@@ -31,7 +31,7 @@
     <nav class="navbar navbar-expand-lg top-navbar sticky-top">
         <div class="container">
             <a class="navbar-brand fw-bold d-flex align-items-center gap-2 font-mono" href="#">
-                <div class="p-2 bg-opacity-10 rounded-circle text-warning" style="background: rgba(227, 115, 24, 0.15); border: 1px solid var(--accent);">
+                <div class="p-2 bg-opacity-10 rounded-circle text-primary" style="background: var(--accent-light); border: 1px solid var(--accent);">
                     <i class="fas fa-shield-halved"></i>
                 </div>
                 SEC-COMPLY
@@ -43,7 +43,7 @@
         </div>
     </nav>
 
-    <!-- Hero Section with Full Interactive Mesh Canvas & Scan-Line Sweep -->
+    <!-- Hero Section with Full Light Mesh Canvas & Blue Scan-Line Sweep -->
     <header class="hero-glass">
         <canvas id="meshCanvas" data-nodes="75" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></canvas>
         <div class="scanline-overlay"></div>
@@ -52,16 +52,16 @@
             <div class="badge px-3 py-2 rounded-pill mb-3 border font-mono" style="background: var(--accent-light); color: var(--accent); border-color: var(--accent) !important;">
                 <i class="fas fa-wand-magic-sparkles me-1"></i> AI-POWERED GOVERNANCE, RISK &amp; COMPLIANCE PLATFORM
             </div>
-            <h1 class="display-4 fw-bold mb-3 text-white">Enterprise Security Compliance Management System</h1>
+            <h1 class="display-4 fw-bold mb-3 text-dark">Enterprise Security Compliance Management System</h1>
             
             <!-- Typewriter hero tagline -->
-            <p class="lead text-light opacity-90 max-w-3xl mx-auto mb-5 font-sans" style="max-width: 780px;" data-typewriter data-typewriter-phrases='["Continuous framework mapping for ISO 27001, NIST CSF 2.0, PCI DSS v4.0, and HIPAA.", "Automate evidence collection, conduct audits, and analyze 5x5 risk heatmaps.", "Enterprise security governance, verified in real-time."]' data-speed="40" data-delay="3500">
+            <p class="lead text-secondary opacity-90 max-w-3xl mx-auto mb-5 font-sans" style="max-width: 780px;" data-typewriter data-typewriter-phrases='["Continuous framework mapping for ISO 27001, NIST CSF 2.0, PCI DSS v4.0, and HIPAA.", "Automate evidence collection, conduct audits, and analyze 5x5 risk heatmaps.", "Enterprise security governance, verified continuously in real-time."]' data-speed="40" data-delay="3500">
                 Automate framework mapping for ISO 27001, NIST CSF 2.0, PCI DSS v4.0, and HIPAA. Streamline task evidence collection, conduct audits, analyze 5x5 risk heatmaps, and export official reports.
             </p>
 
             <div class="d-flex justify-content-center gap-3">
-                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow-lg"><i class="fas fa-rocket me-2"></i> Launch Command Center</a>
-                <a href="#frameworks" class="btn btn-glass btn-lg px-4 text-white border"><i class="fas fa-cubes me-2"></i> Supported Frameworks</a>
+                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg px-4 fw-bold shadow-lg"><i class="fas fa-rocket me-2"></i> Launch Application</a>
+                <a href="#frameworks" class="btn btn-glass btn-lg px-4 border"><i class="fas fa-cubes me-2"></i> Supported Frameworks</a>
             </div>
         </div>
     </header>
@@ -71,19 +71,19 @@
         <div class="container">
             <div class="row g-4 text-center">
                 <div class="col-6 col-md-3">
-                    <h2 class="fw-bold mb-0 text-warning font-mono" data-count-up data-duration="1500">96%</h2>
+                    <h2 class="fw-bold mb-0 text-primary font-mono" data-count-up data-duration="1500">96%</h2>
                     <small class="text-muted text-uppercase tracking-wider font-mono">Continuous Compliance</small>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h2 class="fw-bold mb-0 text-warning font-mono" data-count-up data-duration="1500">4</h2>
+                    <h2 class="fw-bold mb-0 text-primary font-mono" data-count-up data-duration="1500">4</h2>
                     <small class="text-muted text-uppercase tracking-wider font-mono">Global Frameworks</small>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h2 class="fw-bold mb-0 text-warning font-mono" data-count-up data-duration="1500">114</h2>
+                    <h2 class="fw-bold mb-0 text-primary font-mono" data-count-up data-duration="1500">114</h2>
                     <small class="text-muted text-uppercase tracking-wider font-mono">Annex A Controls</small>
                 </div>
                 <div class="col-6 col-md-3">
-                    <h2 class="fw-bold mb-0 text-warning font-mono" data-count-up data-duration="1500">5x5</h2>
+                    <h2 class="fw-bold mb-0 text-primary font-mono" data-count-up data-duration="1500">5x5</h2>
                     <small class="text-muted text-uppercase tracking-wider font-mono">Risk Severity Matrix</small>
                 </div>
             </div>
@@ -94,13 +94,13 @@
     <section id="frameworks" class="py-5">
         <div class="container py-3">
             <div class="text-center mb-5 scroll-reveal">
-                <h2 class="fw-bold">Multi-Framework Governance</h2>
+                <h2 class="fw-bold">Multi-Framework Support</h2>
                 <p class="text-muted">Built-in mappings for leading global cybersecurity &amp; regulatory frameworks</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-3">
                     <div class="glass-card tilt-card p-4 text-center h-100 scroll-reveal" data-stagger="50">
-                        <div class="p-3 bg-opacity-10 text-warning rounded-circle d-inline-block mb-3" style="background: rgba(227, 115, 24, 0.15);">
+                        <div class="p-3 bg-opacity-10 text-primary rounded-circle d-inline-block mb-3" style="background: var(--accent-light);">
                             <i class="fas fa-certificate fa-2x"></i>
                         </div>
                         <h5 class="fw-bold font-mono">ISO/IEC 27001</h5>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="glass-card tilt-card p-4 text-center h-100 scroll-reveal" data-stagger="120">
-                        <div class="p-3 bg-opacity-10 text-success rounded-circle d-inline-block mb-3" style="background: rgba(124, 154, 87, 0.15);">
+                        <div class="p-3 bg-opacity-10 text-success rounded-circle d-inline-block mb-3" style="background: rgba(63, 143, 95, 0.12);">
                             <i class="fas fa-building-columns fa-2x"></i>
                         </div>
                         <h5 class="fw-bold font-mono">NIST CSF 2.0</h5>
@@ -118,7 +118,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="glass-card tilt-card p-4 text-center h-100 scroll-reveal" data-stagger="190">
-                        <div class="p-3 bg-opacity-10 text-warning rounded-circle d-inline-block mb-3" style="background: rgba(201, 162, 39, 0.15);">
+                        <div class="p-3 bg-opacity-10 text-warning rounded-circle d-inline-block mb-3" style="background: rgba(183, 121, 31, 0.12);">
                             <i class="fas fa-credit-card fa-2x"></i>
                         </div>
                         <h5 class="fw-bold font-mono">PCI DSS v4.0</h5>
@@ -127,7 +127,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="glass-card tilt-card p-4 text-center h-100 scroll-reveal" data-stagger="260">
-                        <div class="p-3 bg-opacity-10 text-danger rounded-circle d-inline-block mb-3" style="background: rgba(189, 66, 52, 0.15);">
+                        <div class="p-3 bg-opacity-10 text-danger rounded-circle d-inline-block mb-3" style="background: rgba(193, 68, 58, 0.12);">
                             <i class="fas fa-hospital-user fa-2x"></i>
                         </div>
                         <h5 class="fw-bold font-mono">HIPAA Security</h5>
@@ -142,20 +142,20 @@
     <section class="py-5 border-top" style="background: var(--bg-alt); border-color: var(--line) !important;">
         <div class="container py-3">
             <div class="text-center mb-5 scroll-reveal">
-                <h2 class="fw-bold">Command Center Capabilities</h2>
+                <h2 class="fw-bold">Platform Capabilities</h2>
                 <p class="text-muted">End-to-end security compliance management tailored for enterprise roles</p>
             </div>
             <div class="row g-4">
                 <div class="col-md-4">
                     <div class="glass-card tilt-card p-4 h-100 scroll-reveal" data-stagger="50">
-                        <i class="fas fa-chart-pie fa-2x text-warning mb-3"></i>
+                        <i class="fas fa-chart-pie fa-2x text-primary mb-3"></i>
                         <h5 class="fw-bold">Interactive Dashboard</h5>
                         <p class="small text-muted mb-0">Real-time compliance score, high-risk alerts, task progress, and Chart.js trend visualizations.</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="glass-card tilt-card p-4 h-100 scroll-reveal" data-stagger="120">
-                        <i class="fas fa-robot fa-2x text-warning mb-3"></i>
+                        <i class="fas fa-robot fa-2x text-primary mb-3"></i>
                         <h5 class="fw-bold">AI Compliance Studio</h5>
                         <p class="small text-muted mb-0">Intelligent AI assistant for control queries, missing control detection, and policy generation.</p>
                     </div>
