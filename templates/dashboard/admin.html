@@ -6,52 +6,52 @@
 {% block content %}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-3">
-        <div class="kpi-card d-flex align-items-center justify-content-between">
+        <div class="kpi-card tilt-card scroll-reveal d-flex align-items-center justify-content-between" data-stagger="50">
             <div>
-                <small class="text-muted fw-semibold d-block mb-1">Compliance Score</small>
-                <h3 class="fw-extrabold mb-0 text-primary">{{ stats.compliance_score }}%</h3>
-                <small class="text-success fw-semibold"><i class="fas fa-shield-check me-1"></i> {{ stats.total_policies }} Active Policies</small>
+                <small class="text-muted fw-semibold d-block mb-1 font-mono">Compliance Score</small>
+                <h3 class="fw-extrabold mb-0 text-warning font-mono" data-count-up data-flicker="true">{{ stats.compliance_score }}%</h3>
+                <small class="text-success fw-semibold font-mono"><i class="fas fa-shield-check me-1"></i> {{ stats.total_policies }} Active Policies</small>
             </div>
-            <div class="kpi-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-file-contract"></i></div>
+            <div class="kpi-icon"><i class="fas fa-file-contract"></i></div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="kpi-card d-flex align-items-center justify-content-between">
+        <div class="kpi-card tilt-card scroll-reveal d-flex align-items-center justify-content-between" data-stagger="120">
             <div>
-                <small class="text-muted fw-semibold d-block mb-1">Pending / Under Review</small>
-                <h3 class="fw-extrabold mb-0 text-warning">{{ stats.pending_tasks }}</h3>
-                <small class="text-muted">{{ stats.completed_tasks }} Tasks Completed</small>
+                <small class="text-muted fw-semibold d-block mb-1 font-mono">Pending / Under Review</small>
+                <h3 class="fw-extrabold mb-0 text-amber font-mono" data-count-up data-flicker="true">{{ stats.pending_tasks }}</h3>
+                <small class="text-muted font-mono">{{ stats.completed_tasks }} Tasks Completed</small>
             </div>
-            <div class="kpi-icon bg-warning bg-opacity-10 text-warning"><i class="fas fa-tasks"></i></div>
+            <div class="kpi-icon"><i class="fas fa-tasks"></i></div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="kpi-card d-flex align-items-center justify-content-between">
+        <div class="kpi-card tilt-card scroll-reveal d-flex align-items-center justify-content-between" data-stagger="190">
             <div>
-                <small class="text-muted fw-semibold d-block mb-1">Evidence Reviews</small>
-                <h3 class="fw-extrabold mb-0 text-info">{{ stats.pending_reviews }}</h3>
-                <small class="text-muted">Response Ready</small>
+                <small class="text-muted fw-semibold d-block mb-1 font-mono">Evidence Reviews</small>
+                <h3 class="fw-extrabold mb-0 text-white font-mono" data-count-up>{{ stats.pending_reviews }}</h3>
+                <small class="text-muted font-mono">Response Ready</small>
             </div>
-            <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="fas fa-folder-open"></i></div>
+            <div class="kpi-icon"><i class="fas fa-folder-open"></i></div>
         </div>
     </div>
     <div class="col-6 col-md-3">
-        <div class="kpi-card d-flex align-items-center justify-content-between">
+        <div class="kpi-card tilt-card scroll-reveal d-flex align-items-center justify-content-between" data-stagger="260">
             <div>
-                <small class="text-muted fw-semibold d-block mb-1">High / Critical Risks</small>
-                <h3 class="fw-extrabold mb-0 text-danger">{{ stats.high_risks }}</h3>
-                <small class="text-muted">Requires Controls</small>
+                <small class="text-muted fw-semibold d-block mb-1 font-mono">High / Critical Risks</small>
+                <h3 class="fw-extrabold mb-0 text-danger font-mono" data-count-up>{{ stats.high_risks }}</h3>
+                <small class="text-muted font-mono">Requires Controls</small>
             </div>
-            <div class="kpi-icon bg-danger bg-opacity-10 text-danger"><i class="fas fa-biohazard"></i></div>
+            <div class="kpi-icon"><i class="fas fa-biohazard"></i></div>
         </div>
     </div>
 </div>
 
 <div class="row g-4 mb-4">
     <div class="col-lg-6">
-        <div class="glass-card p-3">
+        <div class="glass-card tilt-card scroll-reveal p-3" data-stagger="100">
             <div class="mb-3 px-2">
-                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-building text-info me-2"></i> Departmental Compliance Breakdown</h6>
+                <h6 class="fw-bold mb-0 text-white font-mono"><i class="fas fa-building text-warning me-2"></i> Departmental Compliance Breakdown</h6>
             </div>
             <div style="height: 280px;">
                 <canvas id="deptChart"></canvas>
@@ -60,9 +60,9 @@
     </div>
 
     <div class="col-lg-6">
-        <div class="glass-card p-3">
+        <div class="glass-card tilt-card scroll-reveal p-3" data-stagger="180">
             <div class="mb-3 px-2">
-                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-pie-chart text-warning me-2"></i> Task Status Overview</h6>
+                <h6 class="fw-bold mb-0 text-white font-mono"><i class="fas fa-pie-chart text-amber me-2"></i> Task Status Overview</h6>
             </div>
             <div style="height: 280px;">
                 <canvas id="taskChart"></canvas>
@@ -73,20 +73,20 @@
 
 <div class="row g-4">
     <div class="col-12">
-        <div class="glass-card p-4">
-            <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-user-cog me-2 text-primary"></i> Admin Operational Shortcuts</h6>
+        <div class="glass-card scroll-reveal p-4" data-stagger="240">
+            <h6 class="fw-bold mb-3 text-white font-mono"><i class="fas fa-user-cog me-2 text-warning"></i> Admin Operational Shortcuts</h6>
             <div class="row g-3">
                 <div class="col-md-3">
-                    <a href="{{ url_for('tasks') }}" class="btn btn-primary w-100 py-2.5 fw-semibold shadow-sm"><i class="fas fa-plus me-1"></i> Assign Task</a>
+                    <a href="{{ url_for('tasks') }}" class="btn btn-primary w-100 py-2.5 fw-semibold shadow-sm font-mono"><i class="fas fa-plus me-1"></i> Assign Task</a>
                 </div>
                 <div class="col-md-3">
-                    <a href="{{ url_for('evidence') }}" class="btn btn-info w-100 py-2.5 fw-semibold text-white shadow-sm"><i class="fas fa-folder-open me-1"></i> Review Evidence</a>
+                    <a href="{{ url_for('evidence') }}" class="btn btn-outline-primary w-100 py-2.5 fw-semibold shadow-sm font-mono"><i class="fas fa-folder-open me-1"></i> Review Evidence</a>
                 </div>
                 <div class="col-md-3">
-                    <a href="{{ url_for('policies') }}" class="btn btn-glass w-100 py-2.5 fw-semibold border"><i class="fas fa-file-contract me-1"></i> Security Policies</a>
+                    <a href="{{ url_for('policies') }}" class="btn btn-glass w-100 py-2.5 fw-semibold font-mono"><i class="fas fa-file-contract me-1"></i> Security Policies</a>
                 </div>
                 <div class="col-md-3">
-                    <a href="{{ url_for('reports') }}" class="btn btn-success w-100 py-2.5 fw-semibold shadow-sm"><i class="fas fa-file-pdf me-1"></i> View Reports</a>
+                    <a href="{{ url_for('reports') }}" class="btn btn-glass w-100 py-2.5 fw-semibold text-warning font-mono"><i class="fas fa-file-pdf me-1"></i> View Reports</a>
                 </div>
             </div>
         </div>
@@ -95,5 +95,5 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}?v=4.0"></script>
 {% endblock %}

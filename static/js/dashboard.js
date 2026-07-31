@@ -1,16 +1,21 @@
-// Glassmorphism Dashboard Chart.js Visualizations v3.0
+// Security Command Center - Chart.js Visualizations v4.0
+// Warm Graphite Palette (#161310) with Burnt Orange (#E37318) and IBM Plex Typography
+
 document.addEventListener("DOMContentLoaded", function () {
+    if (typeof Chart === 'undefined') return;
+
     // Shared Chart.js Font & Style Defaults
-    Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-    Chart.defaults.color = '#64748b';
+    Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+    Chart.defaults.color = '#A89985';
+    Chart.defaults.borderColor = '#3B3227';
 
     // 1. Compliance Trend Chart (Line Chart)
     const trendCtx = document.getElementById('trendChart');
     if (trendCtx) {
         const ctx = trendCtx.getContext('2d');
         const gradient = ctx.createLinearGradient(0, 0, 0, 260);
-        gradient.addColorStop(0, 'rgba(37, 99, 235, 0.35)');
-        gradient.addColorStop(1, 'rgba(37, 99, 235, 0.0)');
+        gradient.addColorStop(0, 'rgba(227, 115, 24, 0.4)');
+        gradient.addColorStop(1, 'rgba(227, 115, 24, 0.0)');
 
         new Chart(trendCtx, {
             type: 'line',
@@ -19,13 +24,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     label: 'Overall Compliance %',
                     data: [68, 72, 79, 81, 85, 91],
-                    borderColor: '#2563eb',
+                    borderColor: '#E37318',
                     backgroundColor: gradient,
                     fill: true,
                     tension: 0.38,
                     borderWidth: 3,
-                    pointBackgroundColor: '#2563eb',
-                    pointBorderColor: '#ffffff',
+                    pointBackgroundColor: '#E37318',
+                    pointBorderColor: '#EDE6D9',
                     pointBorderWidth: 2,
                     pointRadius: 5,
                     pointHoverRadius: 7
@@ -34,23 +39,37 @@ document.addEventListener("DOMContentLoaded", function () {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
-                        titleFont: { family: "'Plus Jakarta Sans', sans-serif", weight: 'bold' },
-                        padding: 10,
+                        backgroundColor: '#221C16',
+                        borderColor: '#3B3227',
+                        borderWidth: 1,
+                        titleColor: '#EDE6D9',
+                        bodyColor: '#A89985',
+                        titleFont: { family: "'IBM Plex Mono', monospace", weight: 'bold' },
+                        padding: 12,
                         cornerRadius: 8,
                         displayColors: false
                     }
                 },
                 scales: {
-                    x: { grid: { display: false } },
+                    x: {
+                        grid: { color: 'rgba(59, 50, 39, 0.4)' },
+                        ticks: { font: { family: "'IBM Plex Mono', monospace" } }
+                    },
                     y: {
                         min: 50,
                         max: 100,
-                        ticks: { callback: value => value + '%' },
-                        grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        ticks: {
+                            callback: value => value + '%',
+                            font: { family: "'IBM Plex Mono', monospace" }
+                        },
+                        grid: { color: 'rgba(59, 50, 39, 0.4)' }
                     }
                 }
             }
@@ -68,34 +87,46 @@ document.addEventListener("DOMContentLoaded", function () {
                     label: 'Compliance %',
                     data: [96, 88, 84, 78, 92],
                     backgroundColor: [
-                        'rgba(37, 99, 235, 0.85)',
-                        'rgba(59, 130, 246, 0.85)',
-                        'rgba(16, 185, 129, 0.85)',
-                        'rgba(245, 158, 11, 0.85)',
-                        'rgba(14, 165, 233, 0.85)'
+                        'rgba(227, 115, 24, 0.9)',
+                        'rgba(201, 162, 39, 0.9)',
+                        'rgba(124, 154, 87, 0.9)',
+                        'rgba(168, 153, 133, 0.9)',
+                        'rgba(227, 115, 24, 0.7)'
                     ],
-                    borderRadius: 8,
+                    borderRadius: 6,
                     borderSkipped: false
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 1200,
+                    easing: 'easeOutQuart'
+                },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: 'rgba(15, 23, 42, 0.85)',
-                        padding: 10,
+                        backgroundColor: '#221C16',
+                        borderColor: '#3B3227',
+                        borderWidth: 1,
+                        padding: 12,
                         cornerRadius: 8
                     }
                 },
                 scales: {
-                    x: { grid: { display: false } },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { family: "'IBM Plex Mono', monospace" } }
+                    },
                     y: {
                         min: 0,
                         max: 100,
-                        ticks: { callback: value => value + '%' },
-                        grid: { color: 'rgba(226, 232, 240, 0.6)' }
+                        ticks: {
+                            callback: value => value + '%',
+                            font: { family: "'IBM Plex Mono', monospace" }
+                        },
+                        grid: { color: 'rgba(59, 50, 39, 0.4)' }
                     }
                 }
             }
@@ -112,22 +143,38 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     data: [4, 6, 3, 1],
                     backgroundColor: [
-                        '#10b981',
-                        '#f59e0b',
-                        '#ef4444',
-                        '#7f1d1d'
+                        '#7C9A57',  // Low - Green
+                        '#C9A227',  // Medium - Amber
+                        '#E37318',  // High - Orange
+                        '#BD4234'   // Critical - Red
                     ],
                     borderWidth: 2,
-                    borderColor: '#ffffff'
+                    borderColor: '#221C16'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    animateScale: true,
+                    duration: 1200
+                },
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif" }, usePointStyle: true, padding: 15 }
+                        labels: {
+                            color: '#EDE6D9',
+                            font: { family: "'IBM Plex Mono', monospace", size: 12 },
+                            usePointStyle: true,
+                            padding: 16
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#221C16',
+                        borderColor: '#3B3227',
+                        borderWidth: 1,
+                        padding: 10
                     }
                 },
                 cutout: '72%'
@@ -145,22 +192,37 @@ document.addEventListener("DOMContentLoaded", function () {
                 datasets: [{
                     data: [14, 4, 6, 2],
                     backgroundColor: [
-                        '#10b981',
-                        '#3b82f6',
-                        '#f59e0b',
-                        '#ef4444'
+                        '#7C9A57',
+                        '#E37318',
+                        '#C9A227',
+                        '#BD4234'
                     ],
                     borderWidth: 2,
-                    borderColor: '#ffffff'
+                    borderColor: '#221C16'
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    animateRotate: true,
+                    duration: 1200
+                },
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { font: { family: "'Plus Jakarta Sans', sans-serif" }, usePointStyle: true, padding: 15 }
+                        labels: {
+                            color: '#EDE6D9',
+                            font: { family: "'IBM Plex Mono', monospace", size: 12 },
+                            usePointStyle: true,
+                            padding: 16
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#221C16',
+                        borderColor: '#3B3227',
+                        borderWidth: 1,
+                        padding: 10
                     }
                 }
             }

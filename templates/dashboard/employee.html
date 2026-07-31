@@ -6,61 +6,74 @@
 {% block content %}
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4">
-        <div class="kpi-card d-flex align-items-center justify-content-between">
+        <div class="kpi-card tilt-card scroll-reveal d-flex align-items-center justify-content-between" data-stagger="50">
             <div>
-                <small class="text-muted fw-semibold d-block mb-1">My Assigned Tasks</small>
-                <h3 class="fw-extrabold mb-0 text-primary">{{ stats.my_tasks }}</h3>
-                <small class="text-muted">Compliance Actions</small>
+                <small class="text-muted fw-semibold d-block mb-1 font-mono">My Assigned Tasks</small>
+                <h3 class="fw-extrabold mb-0 text-warning font-mono" data-count-up>{{ stats.my_tasks }}</h3>
+                <small class="text-muted font-mono">Compliance Actions</small>
             </div>
-            <div class="kpi-icon bg-primary bg-opacity-10 text-primary"><i class="fas fa-tasks"></i></div>
+            <div class="kpi-icon"><i class="fas fa-tasks"></i></div>
         </div>
     </div>
     <div class="col-6 col-md-4">
-        <div class="kpi-card d-flex align-items-center justify-content-between">
+        <div class="kpi-card tilt-card scroll-reveal d-flex align-items-center justify-content-between" data-stagger="120">
             <div>
-                <small class="text-muted fw-semibold d-block mb-1">Evidence Uploaded</small>
-                <h3 class="fw-extrabold mb-0 text-success">{{ stats.my_evidence }}</h3>
-                <small class="text-muted">Submitted Proof Documents</small>
+                <small class="text-muted fw-semibold d-block mb-1 font-mono">Evidence Uploaded</small>
+                <h3 class="fw-extrabold mb-0 text-green font-mono" data-count-up>{{ stats.my_evidence }}</h3>
+                <small class="text-muted font-mono">Submitted Proof Documents</small>
             </div>
-            <div class="kpi-icon bg-success bg-opacity-10 text-success"><i class="fas fa-file-arrow-up"></i></div>
+            <div class="kpi-icon"><i class="fas fa-file-arrow-up"></i></div>
         </div>
     </div>
     <div class="col-6 col-md-4">
-        <div class="kpi-card d-flex align-items-center justify-content-between">
+        <div class="kpi-card tilt-card scroll-reveal d-flex align-items-center justify-content-between" data-stagger="190">
             <div>
-                <small class="text-muted fw-semibold d-block mb-1">Overall Compliance</small>
-                <h3 class="fw-extrabold mb-0 text-info">{{ stats.compliance_score }}%</h3>
-                <small class="text-muted">System Score</small>
+                <small class="text-muted fw-semibold d-block mb-1 font-mono">Overall Compliance</small>
+                <h3 class="fw-extrabold mb-0 text-amber font-mono" data-count-up data-flicker="true">{{ stats.compliance_score }}%</h3>
+                <small class="text-muted font-mono">System Score</small>
             </div>
-            <div class="kpi-icon bg-info bg-opacity-10 text-info"><i class="fas fa-shield-check"></i></div>
+            <div class="kpi-icon"><i class="fas fa-shield-check"></i></div>
         </div>
     </div>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="glass-card p-4">
+        <div class="glass-card scroll-reveal p-4" data-stagger="100">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-list-check text-primary me-2"></i> My Active Tasks</h6>
-                <a href="{{ url_for('tasks') }}" class="small text-primary text-decoration-none fw-semibold">View All Tasks <i class="fas fa-chevron-right ms-1" style="font-size:0.7rem;"></i></a>
+                <h6 class="fw-bold mb-0 text-white font-mono"><i class="fas fa-list-check text-warning me-2"></i> My Active Tasks Queue</h6>
+                <a href="{{ url_for('tasks') }}" class="small text-warning text-decoration-none fw-semibold font-mono">View All Tasks <i class="fas fa-chevron-right ms-1" style="font-size:0.7rem;"></i></a>
             </div>
-            <p class="small text-muted mb-4">Complete assigned compliance actions and upload evidence documents (PDF, DOCX, Images) to maintain endpoint security compliance.</p>
+            
+            <p class="small text-muted mb-4 font-sans" data-typewriter data-typewriter-phrases='["Complete assigned compliance actions and upload evidence documents to maintain endpoint security.", "Supported formats: PDF, DOCX, PNG, JPG files up to 16MB.", "Evidence uploads are automatically submitted for auditor verification."]' data-speed="35" data-delay="3000">
+                Complete assigned compliance actions and upload evidence documents (PDF, DOCX, Images) to maintain endpoint security compliance.
+            </p>
+
+            <!-- Evidence Dropzone Upload Widget -->
+            <div class="p-4 text-center rounded-3 mb-4 border-dashed" style="background: var(--bg-alt); border: 2px dashed var(--line); transition: all 0.3s ease;">
+                <i class="fas fa-cloud-arrow-up fa-2x text-warning mb-2"></i>
+                <h6 class="fw-bold text-white mb-1 font-mono">Drag &amp; Drop Evidence Documents Here</h6>
+                <small class="text-muted d-block mb-3">Or click below to browse files from your computer</small>
+                <div class="d-grid gap-2 col-md-8 mx-auto">
+                    <a href="{{ url_for('evidence') }}" class="btn btn-primary btn-sm py-2 fw-bold shadow-sm font-mono"><i class="fas fa-file-arrow-up me-2"></i> Upload Task Evidence File</a>
+                </div>
+            </div>
+
             <div class="d-grid gap-2">
-                <a href="{{ url_for('tasks') }}" class="btn btn-primary btn-sm py-2.5 fw-bold shadow-sm"><i class="fas fa-tasks me-2"></i> Open My Tasks Queue</a>
-                <a href="{{ url_for('evidence') }}" class="btn btn-outline-success btn-sm py-2.5 fw-bold"><i class="fas fa-file-arrow-up me-2"></i> Upload Task Evidence File</a>
+                <a href="{{ url_for('tasks') }}" class="btn btn-glass btn-sm py-2.5 fw-bold font-mono"><i class="fas fa-tasks me-2"></i> Open My Tasks Queue</a>
             </div>
         </div>
     </div>
 
     <div class="col-lg-4">
-        <div class="glass-card p-4">
-            <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-user-circle me-2 text-info"></i> Employee Profile Summary</h6>
-            <div class="p-3 rounded-3 mb-3" style="background: rgba(241, 245, 249, 0.6); border: 1px solid rgba(226, 232, 240, 0.7);">
-                <small class="text-muted d-block mb-1"><strong>Name:</strong> {{ current_user.full_name }}</small>
-                <small class="text-muted d-block mb-1"><strong>Email:</strong> {{ current_user.email }}</small>
-                <small class="text-muted d-block"><strong>Department:</strong> {{ current_user.department.name if current_user.department else 'General' }}</small>
+        <div class="glass-card tilt-card scroll-reveal p-4" data-stagger="180">
+            <h6 class="fw-bold mb-3 text-white font-mono"><i class="fas fa-user-circle me-2 text-warning"></i> Employee Profile Summary</h6>
+            <div class="p-3 rounded-3 mb-3 font-mono small" style="background: var(--bg-alt); border: 1px solid var(--line);">
+                <small class="text-muted d-block mb-1"><strong>Name:</strong> <span class="text-white">{{ current_user.full_name }}</span></small>
+                <small class="text-muted d-block mb-1"><strong>Email:</strong> <span class="text-white">{{ current_user.email }}</span></small>
+                <small class="text-muted d-block"><strong>Department:</strong> <span class="text-white">{{ current_user.department.name if current_user.department else 'General' }}</span></small>
             </div>
-            <a href="{{ url_for('profile') }}" class="btn btn-glass btn-sm w-100 fw-semibold border"><i class="fas fa-user-edit me-1"></i> Edit My Profile</a>
+            <a href="{{ url_for('profile') }}" class="btn btn-glass btn-sm w-100 fw-semibold font-mono"><i class="fas fa-user-edit me-1"></i> Edit My Profile</a>
         </div>
     </div>
 </div>

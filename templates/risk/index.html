@@ -19,34 +19,34 @@
 <!-- 5x5 Interactive Risk Heatmap Matrix -->
 <div class="row g-4 mb-4">
     <div class="col-lg-7">
-        <div class="glass-card p-4">
+        <div class="glass-card scroll-reveal p-4" data-stagger="50">
             <div class="mb-3">
-                <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-grip text-primary me-2"></i> Likelihood vs. Impact Risk Matrix Grid</h6>
+                <h6 class="fw-bold mb-0 text-white font-mono"><i class="fas fa-grip text-warning me-2"></i> Likelihood vs. Impact Risk Matrix Grid</h6>
             </div>
             <div class="table-responsive">
                 <table class="heatmap-table">
                     <thead>
                         <tr>
-                            <th class="text-muted small text-center" style="width: 100px;">Likelihood \ Impact</th>
-                            <th class="text-center small text-muted">1 - Insignificant</th>
-                            <th class="text-center small text-muted">2 - Minor</th>
-                            <th class="text-center small text-muted">3 - Moderate</th>
-                            <th class="text-center small text-muted">4 - Major</th>
-                            <th class="text-center small text-muted">5 - Catastrophic</th>
+                            <th class="text-muted small text-center font-mono" style="width: 100px;">Likelihood \ Impact</th>
+                            <th class="text-center small text-muted font-mono">1 - Insignificant</th>
+                            <th class="text-center small text-muted font-mono">2 - Minor</th>
+                            <th class="text-center small text-muted font-mono">3 - Moderate</th>
+                            <th class="text-center small text-muted font-mono">4 - Major</th>
+                            <th class="text-center small text-muted font-mono">5 - Catastrophic</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for l in [5, 4, 3, 2, 1] %}
                         <tr>
-                            <td class="fw-bold small text-muted text-center">
+                            <td class="fw-bold small text-muted text-center font-mono">
                                 {% if l == 5 %}5 - Almost Certain{% elif l == 4 %}4 - Likely{% elif l == 3 %}3 - Possible{% elif l == 2 %}2 - Unlikely{% else %}1 - Rare{% endif %}
                             </td>
                             {% for i in [1, 2, 3, 4, 5] %}
                                 {% set score = l * i %}
                                 {% set level = 'Low' if score <= 5 else ('Medium' if score <= 12 else ('High' if score <= 19 else 'Critical')) %}
                                 <td>
-                                    <div class="heatmap-cell level-{{ level|lower }}" title="Score: {{ score }} ({{ level }})">
-                                        <span class="fs-5">{{ score }}</span>
+                                    <div class="heatmap-cell level-{{ level|lower }} font-mono" title="Score: {{ score }} ({{ level }})">
+                                        <span class="fs-5 fw-bold">{{ score }}</span>
                                         <span style="font-size: 0.65rem;" class="text-uppercase tracking-wider">{{ level }}</span>
                                     </div>
                                 </td>

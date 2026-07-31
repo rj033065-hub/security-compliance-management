@@ -4,28 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Authentication - Security Compliance{% endblock %}</title>
-    <!-- Google Fonts -->
+    <!-- Google Fonts: IBM Plex Mono & IBM Plex Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome 6 Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}?v=3.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}?v=4.0">
+    <script src="{{ url_for('static', filename='js/theme-animation.js') }}?v=4.0" defer></script>
 </head>
 <body class="auth-body">
+    <!-- Interactive Mesh Background Canvas & Scan-Line Sweep -->
+    <canvas id="meshCanvas" data-nodes="70" style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;"></canvas>
+    <div class="scanline-overlay"></div>
+
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="auth-card">
                     <div class="auth-header">
-                        <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-25 rounded-circle p-3 mb-3" style="width: 64px; height: 64px; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);">
-                            <i class="fas fa-shield-halved fa-2x text-info"></i>
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle p-3 mb-3" style="width: 64px; height: 64px; background: rgba(227, 115, 24, 0.15); border: 1px solid var(--accent); box-shadow: 0 0 20px rgba(227, 115, 24, 0.4);">
+                            <i class="fas fa-shield-halved fa-2x text-warning"></i>
                         </div>
-                        <h4 class="fw-bold mb-1 text-white">Security Compliance System</h4>
-                        <p class="text-muted small mb-0" style="color: #94a3b8 !important;">Enterprise Governance, Risk &amp; Audit</p>
+                        <h4 class="fw-bold mb-1 text-white font-mono">SEC-COMPLY</h4>
+                        <div class="small mb-0" style="color: var(--text-dim) !important;" data-typewriter data-typewriter-phrases='["Enterprise compliance, verified continuously.", "Continuous GRC monitoring & automated audit.", "ISO 27001, NIST CSF 2.0 & PCI DSS v4.0 ready."]' data-speed="40" data-delay="3000">
+                            Enterprise compliance, verified continuously.
+                        </div>
                     </div>
 
                     <div class="p-4">

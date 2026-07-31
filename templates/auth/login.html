@@ -3,14 +3,15 @@
 {% block title %}Login – Security Compliance System{% endblock %}
 
 {% block content %}
-<div class="mb-4 text-center">
-    <h5 class="fw-bold mb-1 text-dark">Sign In to Your Account</h5>
-    <p class="small text-muted mb-0">Enter your credentials to access your enterprise dashboard</p>
+<div class="mb-4 text-center scroll-reveal" data-stagger="50">
+    <h5 class="fw-bold mb-1 text-white font-mono">Sign In to Your Account</h5>
+    <p class="small text-muted mb-0">Enter your credentials to access your security command center</p>
 </div>
 
 <!-- Google SSO -->
 <button type="button"
-        class="btn btn-glass w-100 py-2.5 mb-3 fw-semibold d-flex align-items-center justify-content-center gap-2 border shadow-sm"
+        class="btn btn-glass w-100 py-2.5 mb-3 fw-semibold d-flex align-items-center justify-content-center gap-2 border shadow-sm scroll-reveal"
+        data-stagger="120"
         data-bs-toggle="modal" data-bs-target="#googleSSOModal">
     <svg width="18" height="18" viewBox="0 0 18 18">
         <path fill="#4285F4" d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z"/>
@@ -21,17 +22,17 @@
     Sign in with Google (Employee SSO)
 </button>
 
-<div class="d-flex align-items-center mb-3">
+<div class="d-flex align-items-center mb-3 scroll-reveal" data-stagger="180">
     <hr class="flex-grow-1 my-0 text-muted opacity-25">
-    <span class="px-2 small text-muted text-uppercase" style="font-size:0.7rem; letter-spacing:0.05em;">Or sign in with credentials</span>
+    <span class="px-2 small text-muted text-uppercase font-mono" style="font-size:0.7rem; letter-spacing:0.05em;">Or sign in with credentials</span>
     <hr class="flex-grow-1 my-0 text-muted opacity-25">
 </div>
 
 <!-- Login Form -->
-<form action="{{ url_for('login') }}" method="POST" id="loginForm" autocomplete="on">
+<form action="{{ url_for('login') }}" method="POST" id="loginForm" autocomplete="on" class="scroll-reveal" data-stagger="240">
     <div class="mb-3">
         <label class="form-label small fw-semibold text-secondary" for="emailInput">Email Address</label>
-        <div class="input-group">
+        <div class="input-group position-relative">
             <span class="input-group-text"><i class="fas fa-envelope text-muted"></i></span>
             <input type="text" name="username" id="emailInput" class="form-control"
                    placeholder="email@company.com" required autocomplete="email">
@@ -41,9 +42,9 @@
     <div class="mb-3">
         <div class="d-flex justify-content-between align-items-center mb-1">
             <label class="form-label small fw-semibold text-secondary mb-0" for="passwordInput">Password</label>
-            <a href="{{ url_for('forgot_password') }}" class="small text-decoration-none text-primary fw-semibold">Forgot Password?</a>
+            <a href="{{ url_for('forgot_password') }}" class="small text-decoration-none text-warning fw-semibold">Forgot Password?</a>
         </div>
-        <div class="input-group">
+        <div class="input-group position-relative">
             <span class="input-group-text"><i class="fas fa-lock text-muted"></i></span>
             <input type="password" name="password" id="passwordInput" class="form-control"
                    placeholder="••••••••" required autocomplete="current-password">
@@ -58,8 +59,8 @@
         <label class="form-check-label small text-muted" for="remember">Keep me signed in</label>
     </div>
 
-    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold mb-3 shadow-md">
-        <i class="fas fa-right-to-bracket me-2"></i> Sign In
+    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold mb-3 shadow-md font-mono">
+        <i class="fas fa-right-to-bracket me-2"></i> SIGN IN TO DASHBOARD
     </button>
 </form>
 
