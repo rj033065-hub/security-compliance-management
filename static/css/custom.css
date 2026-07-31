@@ -61,7 +61,7 @@
 body {
     font-family: var(--font-sans);
     background-color: var(--bg);
-    background-image: 
+    background-image:
         radial-gradient(at 0% 0%, rgba(36, 84, 224, 0.03) 0px, transparent 50%),
         radial-gradient(at 100% 0%, rgba(183, 121, 31, 0.02) 0px, transparent 50%),
         radial-gradient(at 100% 100%, rgba(63, 143, 95, 0.03) 0px, transparent 50%),
@@ -73,15 +73,31 @@ body {
 }
 
 /* Typography Overrides */
-h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.navbar-brand,
+.sidebar-header {
     color: var(--text);
 }
 
-.font-mono, code, kbd, samp, table th, table td .fw-bold, .badge, .kpi-card h3, [data-count-up] {
+.font-mono,
+code,
+kbd,
+samp,
+table th,
+table td .fw-bold,
+.badge,
+.kpi-card h3,
+[data-count-up] {
     font-family: var(--font-mono);
 }
 
-.text-muted, .text-secondary {
+.text-muted,
+.text-secondary {
     color: var(--text-dim) !important;
 }
 
@@ -89,8 +105,14 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
     color: var(--text) !important;
 }
 
-.text-primary, .text-warning, .text-info {
+.text-primary,
+.text-warning,
+.text-info {
     color: var(--accent) !important;
+}
+
+.text-white {
+    color: #ffffff !important;
 }
 
 /* ─── Layout Wrapper ───────────────────────── */
@@ -214,14 +236,14 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
     color: var(--accent);
 }
 
-#sidebar ul li.active > a {
+#sidebar ul li.active>a {
     color: var(--accent);
     background: var(--accent-light);
     border-left-color: var(--accent);
     font-weight: 600;
 }
 
-#sidebar ul li.active > a i {
+#sidebar ul li.active>a i {
     color: var(--accent);
 }
 
@@ -287,13 +309,26 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
 }
 
 @keyframes bellPulse {
-    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(36, 84, 224, 0.7); }
-    70% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(36, 84, 224, 0); }
-    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(36, 84, 224, 0); }
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(36, 84, 224, 0.7);
+    }
+
+    70% {
+        transform: scale(1.15);
+        box-shadow: 0 0 0 8px rgba(36, 84, 224, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(36, 84, 224, 0);
+    }
 }
 
 /* ─── Cards & Panels ────────────────────────────── */
-.card, .glass-card, .kpi-card {
+.card,
+.glass-card,
+.kpi-card {
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
@@ -302,7 +337,9 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
     transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.card:hover, .glass-card:hover, .kpi-card:hover {
+.card:hover,
+.glass-card:hover,
+.kpi-card:hover {
     border-color: var(--accent);
 }
 
@@ -368,7 +405,9 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
 }
 
 /* ─── Forms & Inputs ───────────────────────── */
-.form-control, .form-select, .input-group-text {
+.form-control,
+.form-select,
+.input-group-text {
     background: #FFFFFF;
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
@@ -378,7 +417,8 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
     transition: all 0.2s ease;
 }
 
-.form-control:focus, .form-select:focus {
+.form-control:focus,
+.form-select:focus {
     background: #FFFFFF;
     border-color: var(--accent);
     box-shadow: 0 0 0 4px var(--accent-light);
@@ -415,9 +455,21 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
 }
 
 @keyframes shakeAnim {
-    0%, 100% { transform: translateX(0); }
-    20%, 60% { transform: translateX(-6px); }
-    40%, 80% { transform: translateX(6px); }
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    20%,
+    60% {
+        transform: translateX(-6px);
+    }
+
+    40%,
+    80% {
+        transform: translateX(6px);
+    }
 }
 
 /* ─── Buttons ───────────────────────────── */
@@ -435,7 +487,8 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
     box-shadow: 0 4px 14px rgba(36, 84, 224, 0.25);
 }
 
-.btn-primary:hover, .btn-primary:focus {
+.btn-primary:hover,
+.btn-primary:focus {
     background: var(--accent-hover);
     border-color: var(--accent-hover);
     color: #ffffff;
@@ -604,8 +657,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
 }
 
 @keyframes authCardEntrance {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .auth-header {
@@ -624,20 +684,23 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    background: linear-gradient(
-        to bottom,
-        rgba(255,255,255,0),
-        rgba(36, 84, 224, 0.06) 50%,
-        rgba(255,255,255,0)
-    );
+    background: linear-gradient(to bottom,
+            rgba(255, 255, 255, 0),
+            rgba(36, 84, 224, 0.06) 50%,
+            rgba(255, 255, 255, 0));
     background-size: 100% 8px;
     animation: scanlineSweep 8s linear infinite;
     z-index: 2;
 }
 
 @keyframes scanlineSweep {
-    0% { transform: translateY(-100%); }
-    100% { transform: translateY(100%); }
+    0% {
+        transform: translateY(-100%);
+    }
+
+    100% {
+        transform: translateY(100%);
+    }
 }
 
 /* ─── Typewriter & Scroll Reveal Helpers ──────────────── */
@@ -649,8 +712,15 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
 }
 
 @keyframes caretBlink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
 }
 
 .scroll-reveal {
@@ -666,17 +736,23 @@ h1, h2, h3, h4, h5, h6, .navbar-brand, .sidebar-header {
 
 /* ─── Accessibility: Reduced Motion ───────────────────── */
 @media (prefers-reduced-motion: reduce) {
-    *, ::before, ::after {
+
+    *,
+    ::before,
+    ::after {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+
     .scroll-reveal {
         opacity: 1 !important;
         transform: none !important;
     }
-    .scanline-overlay, canvas {
+
+    .scanline-overlay,
+    canvas {
         display: none !important;
     }
 }
