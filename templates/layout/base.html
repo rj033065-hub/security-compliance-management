@@ -21,8 +21,9 @@
 <body>
 <div id="wrapper">
 
-    <!-- Subtler Header Mesh Canvas for Dashboard -->
-    <canvas id="dashHeaderMesh" style="position: absolute; top:0; left:0; width:100%; height:120px; pointer-events:none; z-index:0; opacity:0.3;"></canvas>
+    <!-- Shared Persistent Dashboard Background: Mouse-Reactive Mesh Canvas & Scan-Line Sweep -->
+    <canvas id="dashboardMeshCanvas" data-nodes="38" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; opacity: 0.5;"></canvas>
+    <div class="dashboard-scanline-overlay"></div>
 
     <!-- Sidebar Backdrop Overlay -->
     <div id="sidebarOverlay"></div>

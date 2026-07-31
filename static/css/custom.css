@@ -111,8 +111,9 @@ table td .fw-bold,
     color: var(--accent) !important;
 }
 
+
 .text-white {
-    color: #ffffff !important;
+    color: #0202fb !important;
 }
 
 /* ─── Layout Wrapper ───────────────────────── */

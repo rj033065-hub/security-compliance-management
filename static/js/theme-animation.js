@@ -70,9 +70,14 @@
 
         resize() {
             if (!this.canvas) return;
-            const parent = this.canvas.parentElement || document.body;
-            this.width = this.canvas.width = parent.clientWidth || window.innerWidth;
-            this.height = this.canvas.height = parent.clientHeight || window.innerHeight;
+            if (this.canvas.style.position === "fixed" || this.canvas.id === "dashboardMeshCanvas") {
+                this.width = this.canvas.width = window.innerWidth;
+                this.height = this.canvas.height = window.innerHeight;
+            } else {
+                const parent = this.canvas.parentElement || document.body;
+                this.width = this.canvas.width = parent.clientWidth || window.innerWidth;
+                this.height = this.canvas.height = parent.clientHeight || window.innerHeight;
+            }
         }
 
         createNodes() {
@@ -501,6 +506,16 @@
     document.addEventListener("DOMContentLoaded", () => {
         if (document.getElementById("meshCanvas")) {
             new MeshBackground("meshCanvas", { nodeCount: 65, maxDistance: 130 });
+        }
+
+        if (document.getElementById("dashboardMeshCanvas")) {
+            new MeshBackground("dashboardMeshCanvas", {
+                nodeCount: 38,
+                maxDistance: 135,
+                speed: 0.35,
+                nodeColor: "rgba(16, 22, 43, 0.40)",
+                lineColor: "rgba(36, 84, 224, 0.14)"
+            });
         }
 
         if (document.getElementById("dashHeaderMesh")) {
