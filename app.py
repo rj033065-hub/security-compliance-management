@@ -1350,7 +1350,17 @@ def profile():
 # APPLICATION STARTUP
 # ─────────────────────────────────────────────
 
+from sqlalchemy import inspect
+
 with app.app_context():
+    try:
+        inspector = inspect(db.engine)
+        if 'departments' in inspector.get_table_names():
+            columns = [c['name'] for c in inspector.get_columns('departments')]
+            if 'company_id' not in columns:
+                db.drop_all()
+    except Exception as e:
+        pass
     db.create_all()
     _ensure_default_superadmin()
 
