@@ -12,17 +12,20 @@ def log_activity(action: str, details: str = ''):
     """Write a row to activity_logs. Safe to call even outside request context."""
     try:
         if current_user and current_user.is_authenticated:
-            user_id   = current_user.id
-            user_name = current_user.email
-            user_role = current_user.role
+            user_id    = current_user.id
+            user_name  = current_user.email
+            user_role  = current_user.role
+            company_id = current_user.company_id
         else:
-            user_id   = None
-            user_name = 'System'
-            user_role = 'System'
+            user_id    = None
+            user_name  = 'System'
+            user_role  = 'System'
+            company_id = None
 
         ip = flask_request.remote_addr if flask_request else None
 
         log = ActivityLog(
+            company_id = company_id,
             user_id    = user_id,
             user_name  = user_name,
             user_role  = user_role,

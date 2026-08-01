@@ -1,6 +1,6 @@
 """
 app.py – Security Compliance Management System
-Flask application with database-backed RBAC authentication.
+Multi-Tenant Flask application with database-backed RBAC authentication and Company isolation.
 """
 import os
 import random
@@ -10,12 +10,12 @@ from functools import wraps
 from flask import (Flask, render_template, request, redirect,
                    url_for, flash, jsonify, send_file, abort)
 from flask_login import (LoginManager, login_user, logout_user,
-                         login_required, current_user)
+                          login_required, current_user)
 from werkzeug.utils import secure_filename
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 
 from config import Config
-from models import (db, User, Department, Framework, Policy, Control,
+from models import (db, Company, User, Department, Framework, Policy, Control,
                     Task, Evidence, Audit, RiskAssessment, Notification, ActivityLog)
 from services.ai_service import AIConsultant
 from services.report_service import ReportGenerator
@@ -38,6 +38,45 @@ login_manager.login_message_category = 'warning'
 serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
 
 # ─────────────────────────────────────────────
+# Helper: Seed Default Company Data
+# ─────────────────────────────────────────────
+def seed_company_defaults(company):
+    """Seed standard departments, frameworks, and controls for a newly created company."""
+    depts = [
+        Department(company_id=company.id, name="Cybersecurity & Governance", code="SEC-01", manager_name="Security Lead", description="Oversees security, policies, audits, and risk."),
+        Department(company_id=company.id, name="IT Infrastructure & Systems", code="IT-01",  manager_name="IT Admin", description="Manages servers, cloud, networks, and endpoints."),
+        Department(company_id=company.id, name="Software Engineering",          code="DEV-01", manager_name="Lead Engineer", description="Application development and Secure SDLC."),
+        Department(company_id=company.id, name="Human Resources",               code="HR-01",  manager_name="HR Lead", description="Employee onboarding, training, and compliance."),
+        Department(company_id=company.id, name="Finance & Operations",          code="OPS-01", manager_name="Ops Manager", description="Financial operations and regulatory reporting."),
+    ]
+    db.session.add_all(depts)
+    db.session.flush()
+
+    fw_iso   = Framework(company_id=company.id, name="ISO/IEC 27001:2022",       code="ISO-27001",   version="2022", category="International Standard", status="Enabled",
+                         description="International standard for ISMS, defining security controls across Annex A domains.")
+    fw_nist  = Framework(company_id=company.id, name="NIST Cybersecurity Framework", code="NIST-CSF-2.0", version="2.0", category="Government Standard",   status="Enabled",
+                         description="Framework for managing cybersecurity risk (Govern, Identify, Protect, Detect, Respond, Recover).")
+    fw_pci   = Framework(company_id=company.id, name="PCI DSS v4.0",               code="PCI-DSS-4.0", version="4.0", category="Financial Security",      status="Enabled",
+                         description="Payment Card Industry Data Security Standard for protecting cardholder data.")
+    fw_hipaa = Framework(company_id=company.id, name="HIPAA Security Rule",         code="HIPAA-SEC",   version="2023", category="Healthcare Security",     status="Enabled",
+                         description="Safeguards for electronic Protected Health Information (ePHI).")
+    db.session.add_all([fw_iso, fw_nist, fw_pci, fw_hipaa])
+    db.session.flush()
+
+    c1 = Control(company_id=company.id, framework_id=fw_iso.id,  control_code="A.5.15",    name="Access Control & Password Policy",      category="Identity & Access",    risk_level="High",     status="Implemented",    description="Strong passwords and automatic session timeout.")
+    c2 = Control(company_id=company.id, framework_id=fw_iso.id,  control_code="A.8.5",     name="Multi-Factor Authentication (MFA)",     category="Identity & Access",    risk_level="Critical",  status="Implemented",    description="MFA for all cloud services, VPNs, admin portals.")
+    c3 = Control(company_id=company.id, framework_id=fw_iso.id,  control_code="A.8.7",     name="Antivirus & EDR Endpoint Protection",   category="Endpoint Protection",  risk_level="High",     status="Implemented",    description="Next-Gen EDR with automated virus definition updates.")
+    c4 = Control(company_id=company.id, framework_id=fw_iso.id,  control_code="A.8.20",    name="Firewall & Network Security Config",    category="Network Security",     risk_level="High",     status="Implemented",    description="Restrictive firewall rules and IDS/IPS systems.")
+    c5 = Control(company_id=company.id, framework_id=fw_iso.id,  control_code="A.8.24",    name="Full Disk Encryption (BitLocker)",      category="Data Protection",      risk_level="Critical",  status="Implemented",    description="AES-256 encryption on all laptops and mobile devices.")
+    c6 = Control(company_id=company.id, framework_id=fw_nist.id, control_code="PR.IP-01",  name="OS & Vulnerability Patching",          category="System Maintenance",   risk_level="High",     status="Partial",        description="Apply critical patches within 14 days of publication.")
+    c7 = Control(company_id=company.id, framework_id=fw_nist.id, control_code="PR.IP-04",  name="Automated Backup & Disaster Recovery",  category="Resilience",           risk_level="High",     status="Implemented",    description="Encrypted daily off-site backups; quarterly recovery tests.")
+    c8 = Control(company_id=company.id, framework_id=fw_hipaa.id,control_code="§ 164.308", name="Security Awareness & Phishing Training",category="Personnel",            risk_level="Medium",    status="Partial",        description="Mandatory quarterly cybersecurity awareness training.")
+    db.session.add_all([c1,c2,c3,c4,c5,c6,c7,c8])
+    db.session.flush()
+    return depts, [fw_iso, fw_nist, fw_pci, fw_hipaa], [c1,c2,c3,c4,c5,c6,c7,c8]
+
+
+# ─────────────────────────────────────────────
 # User loader
 # ─────────────────────────────────────────────
 @login_manager.user_loader
@@ -46,7 +85,7 @@ def load_user(user_id):
 
 
 # ─────────────────────────────────────────────
-# RBAC decorator  (fixed logic)
+# RBAC decorator
 # ─────────────────────────────────────────────
 def role_required(*allowed_roles):
     """Restrict view to users whose role is in allowed_roles."""
@@ -69,9 +108,11 @@ def role_required(*allowed_roles):
 @app.context_processor
 def inject_globals():
     unread = 0
+    company = None
     if current_user.is_authenticated:
         unread = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
-    return dict(unread_notifications_count=unread)
+        company = current_user.company
+    return dict(unread_notifications_count=unread, current_company=company)
 
 
 @app.template_filter('format_datetime')
@@ -90,11 +131,14 @@ def to_ist_filter(value):
 # Helpers
 # ─────────────────────────────────────────────
 def compliance_score():
-    total = Control.query.count()
+    if not current_user.is_authenticated or not current_user.company_id:
+        return 100
+    cid = current_user.company_id
+    total = Control.query.filter_by(company_id=cid).count()
     if not total:
         return 100
-    impl    = Control.query.filter_by(status='Implemented').count()
-    partial = Control.query.filter_by(status='Partial').count()
+    impl    = Control.query.filter_by(company_id=cid, status='Implemented').count()
+    partial = Control.query.filter_by(company_id=cid, status='Partial').count()
     return int(((impl + partial * 0.5) / total) * 100)
 
 
@@ -111,7 +155,10 @@ def validate_password(password):
 
 
 def create_notification(user_id, title, message, link=None, notification_type='info'):
+    u = User.query.get(user_id)
+    cid = u.company_id if u else (current_user.company_id if current_user.is_authenticated else None)
     notification = Notification(
+        company_id=cid,
         user_id=user_id,
         title=title,
         message=message,
@@ -123,44 +170,55 @@ def create_notification(user_id, title, message, link=None, notification_type='i
 
 
 def _dashboard_stats():
+    if not current_user.is_authenticated or not current_user.company_id:
+        return {}
+    cid = current_user.company_id
+
     risk_summary = {
-        'critical': RiskAssessment.query.filter_by(risk_level='Critical').count(),
-        'high': RiskAssessment.query.filter_by(risk_level='High').count(),
-        'medium': RiskAssessment.query.filter_by(risk_level='Medium').count(),
-        'low': RiskAssessment.query.filter_by(risk_level='Low').count(),
+        'critical': RiskAssessment.query.filter_by(company_id=cid, risk_level='Critical').count(),
+        'high': RiskAssessment.query.filter_by(company_id=cid, risk_level='High').count(),
+        'medium': RiskAssessment.query.filter_by(company_id=cid, risk_level='Medium').count(),
+        'low': RiskAssessment.query.filter_by(company_id=cid, risk_level='Low').count(),
     }
-    my_tasks = 0
-    my_evidence = 0
-    if current_user.is_authenticated:
-        my_tasks = Task.query.filter_by(assigned_to_id=current_user.id).count()
-        my_evidence = Evidence.query.filter_by(employee_id=current_user.id).count()
+    my_tasks = Task.query.filter_by(company_id=cid, assigned_to_id=current_user.id).count()
+    my_evidence = Evidence.query.filter_by(company_id=cid, employee_id=current_user.id).count()
+
     return {
-        'total_employees':  User.query.count(),
-        'total_users':      User.query.count(),
-        'total_departments': Department.query.count(),
-        'total_policies':   Policy.query.filter_by(status='Active').count(),
-        'total_frameworks': Framework.query.filter_by(status='Enabled').count(),
-        'compliance_score': compliance_score(),
-        'pending_tasks':    Task.query.filter(Task.status.in_(['Pending', 'In Progress', 'Overdue', 'Under Review'])).count(),
-        'completed_tasks':  Task.query.filter_by(status='Completed').count(),
-        'overdue_tasks':    Task.query.filter(Task.status != 'Completed', Task.due_date < date.today()).count(),
-        'high_risks':       RiskAssessment.query.filter(RiskAssessment.risk_level.in_(['High', 'Critical'])).count(),
-        'active_audits':    Audit.query.filter(Audit.status.in_(['Scheduled', 'In Progress'])).count(),
-        'total_audits':     Audit.query.count(),
-        'pending_reviews':  Evidence.query.filter_by(review_status='Pending').count(),
-        'my_tasks':         my_tasks,
-        'my_evidence':       my_evidence,
-        'risk_summary':     risk_summary,
-        'recent_activities': ActivityLog.query.order_by(ActivityLog.created_at.desc()).limit(6).all(),
+        'total_employees':   User.query.filter_by(company_id=cid).count(),
+        'total_users':       User.query.filter_by(company_id=cid).count(),
+        'total_departments': Department.query.filter_by(company_id=cid).count(),
+        'total_policies':    Policy.query.filter_by(company_id=cid, status='Active').count(),
+        'total_frameworks':  Framework.query.filter_by(company_id=cid, status='Enabled').count(),
+        'compliance_score':  compliance_score(),
+        'pending_tasks':     Task.query.filter_by(company_id=cid).filter(Task.status.in_(['Pending', 'In Progress', 'Overdue', 'Under Review'])).count(),
+        'completed_tasks':   Task.query.filter_by(company_id=cid, status='Completed').count(),
+        'overdue_tasks':     Task.query.filter_by(company_id=cid).filter(Task.status != 'Completed', Task.due_date < date.today()).count(),
+        'high_risks':        RiskAssessment.query.filter_by(company_id=cid).filter(RiskAssessment.risk_level.in_(['High', 'Critical'])).count(),
+        'active_audits':     Audit.query.filter_by(company_id=cid).filter(Audit.status.in_(['Scheduled', 'In Progress'])).count(),
+        'total_audits':      Audit.query.filter_by(company_id=cid).count(),
+        'pending_reviews':   Evidence.query.filter_by(company_id=cid, review_status='Pending').count(),
+        'my_tasks':          my_tasks,
+        'my_evidence':        my_evidence,
+        'risk_summary':      risk_summary,
+        'recent_activities': ActivityLog.query.filter_by(company_id=cid).order_by(ActivityLog.created_at.desc()).limit(6).all(),
     }
 
 
 def _ensure_default_superadmin():
-    """Create the default Super Admin if none exists yet."""
+    """Create a default company and Super Admin if none exists yet."""
+    company = Company.query.first()
+    if not company:
+        company = Company(name="Acme Cybersecurity Corp", code="ACME", contact_email=app.config['DEFAULT_SUPERADMIN_EMAIL'], status="Active")
+        db.session.add(company)
+        db.session.flush()
+        seed_company_defaults(company)
+
     if User.query.filter_by(role='Super Admin').first():
         return
-    dept = Department.query.first()
+
+    dept = Department.query.filter_by(company_id=company.id).first()
     sa = User(
+        company_id            = company.id,
         full_name             = app.config['DEFAULT_SUPERADMIN_NAME'],
         username              = 'superadmin',
         email                 = app.config['DEFAULT_SUPERADMIN_EMAIL'],
@@ -168,7 +226,7 @@ def _ensure_default_superadmin():
         department_id         = dept.id if dept else None,
         job_title             = 'Chief Information Security Officer',
         status                = 'Active',
-        must_change_password  = True,   # force password change on first login
+        must_change_password  = True,
     )
     sa.set_password(app.config['DEFAULT_SUPERADMIN_PASSWORD'])
     db.session.add(sa)
@@ -178,13 +236,13 @@ def _ensure_default_superadmin():
 
 # ─────────────────────────────────────────────
 # =============================================
-#  AUTHENTICATION  ROUTES
+#  AUTHENTICATION & COMPANY REGISTRATION ROUTES
 # =============================================
 # ─────────────────────────────────────────────
 
 @app.before_request
 def enforce_access_controls():
-    public_endpoints = {'landing', 'login', 'register', 'forgot_password', 'reset_password_token', 'login_google', 'static'}
+    public_endpoints = {'landing', 'login', 'register', 'register_company', 'forgot_password', 'reset_password_token', 'login_google', 'static'}
     if request.endpoint in public_endpoints:
         return None
     if current_user.is_authenticated and current_user.status != 'Active':
@@ -241,6 +299,121 @@ def login():
     return render_template('auth/login.html')
 
 
+@app.route('/register-company', methods=['GET', 'POST'])
+def register_company():
+    """Register a brand new company and auto-create its Super Admin user."""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        company_name  = _normalize_text(request.form.get('company_name', ''))
+        company_code  = _normalize_text(request.form.get('company_code', '')).upper()
+        contact_email = _normalize_text(request.form.get('contact_email', '')).lower()
+        full_name     = _normalize_text(request.form.get('full_name', ''))
+        username      = _normalize_text(request.form.get('username', '')).lower()
+        email         = _normalize_text(request.form.get('email', '')).lower()
+        password      = request.form.get('password', '')
+
+        if not company_name or not full_name or not username or not email or not password:
+            flash('Please complete all required fields.', 'danger')
+            return redirect(url_for('register_company'))
+
+        valid, msg = validate_password(password)
+        if not valid:
+            flash(msg, 'danger')
+            return redirect(url_for('register_company'))
+
+        if Company.query.filter_by(name=company_name).first():
+            flash('A company with that name is already registered.', 'danger')
+            return redirect(url_for('register_company'))
+
+        if User.query.filter_by(username=username).first():
+            flash('Username is already taken.', 'danger')
+            return redirect(url_for('register_company'))
+
+        if User.query.filter_by(email=email).first():
+            flash('Email address is already registered.', 'danger')
+            return redirect(url_for('register_company'))
+
+        code = company_code or company_name.replace(' ', '').upper()[:8]
+        company = Company(name=company_name, code=code, contact_email=contact_email or email, status='Active')
+        db.session.add(company)
+        db.session.flush()
+
+        depts, _, _ = seed_company_defaults(company)
+        sec_dept = depts[0] if depts else None
+
+        superadmin = User(
+            company_id=company.id,
+            full_name=full_name,
+            username=username,
+            email=email,
+            role='Super Admin',
+            department_id=sec_dept.id if sec_dept else None,
+            job_title='Super Admin & Executive Officer',
+            status='Active',
+            must_change_password=False
+        )
+        superadmin.set_password(password)
+        db.session.add(superadmin)
+        db.session.commit()
+
+        log_activity('Company Registered', f'Company {company_name} registered with SuperAdmin {email}')
+        flash(f'Company "{company_name}" registered successfully! Super Admin account created. Please log in.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('auth/register_company.html')
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """Employee self-registration under an existing company."""
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
+    companies = Company.query.filter_by(status='Active').all()
+
+    if request.method == 'POST':
+        company_id= request.form.get('company_id')
+        full_name = _normalize_text(request.form.get('full_name', ''))
+        username  = _normalize_text(request.form.get('username', '')).lower()
+        email     = _normalize_text(request.form.get('email', '')).lower()
+        password  = request.form.get('password', '')
+        dept_id   = request.form.get('department_id')
+
+        if not company_id or not full_name or not username or not email:
+            flash('Please complete all required fields.', 'danger')
+            return redirect(url_for('register'))
+        valid, msg = validate_password(password)
+        if not valid:
+            flash(msg, 'danger')
+            return redirect(url_for('register'))
+        if User.query.filter_by(username=username).first():
+            flash('Username already taken.', 'danger')
+            return redirect(url_for('register'))
+        if User.query.filter_by(email=email).first():
+            flash('Email already registered.', 'danger')
+            return redirect(url_for('register'))
+
+        u = User(company_id=int(company_id), full_name=full_name, username=username, email=email,
+                 role='Employee', department_id=dept_id or None, status='Active')
+        u.set_password(password)
+        db.session.add(u)
+        db.session.commit()
+        log_activity('Registration', f'New employee registered: {email}')
+        flash('Account created! Please log in.', 'success')
+        return redirect(url_for('login'))
+
+    return render_template('auth/register.html', companies=companies)
+
+
+@app.route('/api/company/<int:cid>/departments')
+def api_company_departments(cid):
+    """API endpoint to load departments dynamically for a selected company."""
+    depts = Department.query.filter_by(company_id=cid).all()
+    return jsonify([{'id': d.id, 'name': d.name, 'code': d.code} for d in depts])
+
+
 @app.route('/force-change-password', methods=['GET', 'POST'])
 @login_required
 def force_change_password():
@@ -278,11 +451,13 @@ def login_google():
 
     user = User.query.filter_by(email=google_email).first()
     if not user:
+        company = Company.query.first()
         uname = google_email.split('@')[0]
         if User.query.filter_by(username=uname).first():
             uname = f"{uname}_{random.randint(100, 999)}"
-        dept = Department.query.first()
+        dept = Department.query.filter_by(company_id=company.id).first() if company else None
         user = User(
+            company_id    = company.id if company else None,
             full_name     = uname.replace('.', ' ').title(),
             username      = uname,
             email         = google_email,
@@ -307,45 +482,6 @@ def login_google():
     return redirect(url_for('dashboard'))
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('dashboard'))
-
-    departments = Department.query.all()
-    if request.method == 'POST':
-        full_name = _normalize_text(request.form.get('full_name', ''))
-        username  = _normalize_text(request.form.get('username', '')).lower()
-        email     = _normalize_text(request.form.get('email', '')).lower()
-        password  = request.form.get('password', '')
-        dept_id   = request.form.get('department_id')
-
-        if not full_name or not username or not email:
-            flash('Please complete all required fields.', 'danger')
-            return redirect(url_for('register'))
-        valid, msg = validate_password(password)
-        if not valid:
-            flash(msg, 'danger')
-            return redirect(url_for('register'))
-        if User.query.filter_by(username=username).first():
-            flash('Username already taken.', 'danger')
-            return redirect(url_for('register'))
-        if User.query.filter_by(email=email).first():
-            flash('Email already registered.', 'danger')
-            return redirect(url_for('register'))
-
-        u = User(full_name=full_name, username=username, email=email,
-                 role='Employee', department_id=dept_id or None, status='Active')
-        u.set_password(password)
-        db.session.add(u)
-        db.session.commit()
-        log_activity('Registration', f'New employee registered: {email}')
-        flash('Account created! Please log in.', 'success')
-        return redirect(url_for('login'))
-
-    return render_template('auth/register.html', departments=departments)
-
-
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
@@ -355,7 +491,6 @@ def forgot_password():
             token     = serializer.dumps(email, salt='pwd-reset')
             reset_url = url_for('reset_password_token', token=token, _external=True)
             log_activity('Password Reset Requested', f'Token for {email}')
-            # In production, send this link by email.  For dev, display it:
             flash(f'Reset link (dev mode): {reset_url}', 'info')
         else:
             flash('If that email exists a reset link has been sent.', 'info')
@@ -412,10 +547,11 @@ def dashboard():
     if current_user.must_change_password:
         return redirect(url_for('force_change_password'))
 
+    cid = current_user.company_id
     stats  = _dashboard_stats()
-    logs   = ActivityLog.query.order_by(ActivityLog.created_at.desc()).limit(6).all()
+    logs   = ActivityLog.query.filter_by(company_id=cid).order_by(ActivityLog.created_at.desc()).limit(6).all()
     notifs = (Notification.query
-              .filter_by(user_id=current_user.id)
+              .filter_by(company_id=cid, user_id=current_user.id)
               .order_by(Notification.created_at.desc())
               .limit(5).all())
 
@@ -447,7 +583,8 @@ def users():
     dept_f      = request.args.get('dept_filter', '').strip()
     page        = request.args.get('page', 1, type=int)
 
-    query = User.query
+    cid   = current_user.company_id
+    query = User.query.filter_by(company_id=cid)
     if q:
         query = query.filter(
             (User.full_name.ilike(f'%{q}%')) |
@@ -460,7 +597,7 @@ def users():
         query = query.filter_by(department_id=int(dept_f))
 
     pagination  = query.order_by(User.created_at.desc()).paginate(page=page, per_page=USERS_PER_PAGE, error_out=False)
-    departments = Department.query.all()
+    departments = Department.query.filter_by(company_id=cid).all()
 
     return render_template('users/index.html',
                            users=pagination.items,
@@ -473,6 +610,7 @@ def users():
 @login_required
 @role_required('Super Admin', 'Admin')
 def create_user():
+    cid       = current_user.company_id
     full_name = _normalize_text(request.form.get('full_name', ''))
     username  = _normalize_text(request.form.get('username', '')).lower()
     email     = _normalize_text(request.form.get('email', '')).lower()
@@ -490,12 +628,8 @@ def create_user():
         flash(msg, 'danger')
         return redirect(url_for('users'))
 
-    if current_user.role == 'Admin' and role != 'Employee':
-        flash('Admins can only create Employee accounts.', 'danger')
-        return redirect(url_for('users'))
-
-    if role == 'Super Admin' and User.query.filter_by(role='Super Admin').first():
-        flash('Only one Super Admin account is allowed in the system.', 'danger')
+    if current_user.role == 'Admin' and role not in ['Employee', 'Auditor']:
+        flash('Admins can only create Employee or Auditor accounts.', 'danger')
         return redirect(url_for('users'))
 
     if User.query.filter_by(email=email).first():
@@ -505,14 +639,14 @@ def create_user():
         flash('Username is already taken.', 'danger')
         return redirect(url_for('users'))
 
-    u = User(full_name=full_name, username=username, email=email,
+    u = User(company_id=cid, full_name=full_name, username=username, email=email,
              role=role, department_id=dept_id or None, phone=phone, status='Active')
     u.set_password(password)
     db.session.add(u)
     db.session.commit()
-    create_notification(u.id, 'Welcome to the system', 'Your account has been created. Please review your profile and complete any required actions.', link='/profile', notification_type='info')
+    create_notification(u.id, 'Welcome to the system', 'Your account has been created. Please review your profile.', link='/profile', notification_type='info')
     log_activity('User Created', f'{email} ({role})')
-    flash(f'Account for {email} created successfully.', 'success')
+    flash(f'Account for {email} ({role}) created successfully.', 'success')
     return redirect(url_for('users'))
 
 
@@ -520,9 +654,9 @@ def create_user():
 @login_required
 @role_required('Super Admin', 'Admin')
 def edit_user(uid):
-    u = User.query.get_or_404(uid)
+    cid = current_user.company_id
+    u   = User.query.filter_by(id=uid, company_id=cid).first_or_404()
 
-    # Admins cannot edit Super Admins
     if current_user.role == 'Admin' and u.role == 'Super Admin':
         flash('Access denied. Admins cannot edit Super Admin accounts.', 'danger')
         return redirect(url_for('users'))
@@ -555,14 +689,8 @@ def edit_user(uid):
     dept_id         = request.form.get('department_id')
     u.department_id = int(dept_id) if dept_id else None
 
-    # Only Super Admin can change roles
     if current_user.role == 'Super Admin':
-        new_role = request.form.get('role', u.role)
-        if new_role == 'Super Admin' and u.role != 'Super Admin':
-            if User.query.filter_by(role='Super Admin').first():
-                flash('Only one Super Admin account is allowed in the system.', 'danger')
-                return redirect(url_for('users'))
-        u.role = new_role
+        u.role = request.form.get('role', u.role)
 
     db.session.commit()
     log_activity('User Edited', f'{u.email}')
@@ -574,17 +702,15 @@ def edit_user(uid):
 @login_required
 @role_required('Super Admin', 'Admin')
 def toggle_user_status(uid):
-    u = User.query.get_or_404(uid)
-    if u.role == 'Super Admin':
-        flash('The Super Admin account cannot be deactivated.', 'danger')
+    cid = current_user.company_id
+    u   = User.query.filter_by(id=uid, company_id=cid).first_or_404()
+
+    if u.role == 'Super Admin' and u.id == current_user.id:
+        flash('You cannot deactivate your own Super Admin account.', 'danger')
         return redirect(url_for('users'))
 
     if current_user.role == 'Admin' and u.role in ['Super Admin', 'Admin']:
         flash('Admins cannot change the status of other Admin or Super Admin accounts.', 'danger')
-        return redirect(url_for('users'))
-
-    if u.id == current_user.id:
-        flash('You cannot deactivate your own account.', 'warning')
         return redirect(url_for('users'))
 
     u.status = 'Inactive' if u.status == 'Active' else 'Active'
@@ -598,7 +724,9 @@ def toggle_user_status(uid):
 @login_required
 @role_required('Super Admin', 'Admin')
 def admin_reset_password(uid):
-    u  = User.query.get_or_404(uid)
+    cid = current_user.company_id
+    u   = User.query.filter_by(id=uid, company_id=cid).first_or_404()
+
     if current_user.role == 'Admin' and u.role == 'Super Admin':
         flash('Access denied. Admins cannot reset Super Admin passwords.', 'danger')
         return redirect(url_for('users'))
@@ -612,7 +740,7 @@ def admin_reset_password(uid):
     u.set_password(pw)
     u.must_change_password = True
     db.session.commit()
-    create_notification(u.id, 'Password reset', 'Your password has been reset by an administrator. Please sign in and update it.', link='/profile', notification_type='warning')
+    create_notification(u.id, 'Password reset', 'Your password has been reset by an administrator.', link='/profile', notification_type='warning')
     log_activity('Password Reset (Admin)', f'Reset for {u.email}')
     flash(f'Password for {u.email} reset successfully.', 'success')
     return redirect(url_for('users'))
@@ -626,21 +754,18 @@ def delete_user(uid):
         flash('You cannot delete your own active account.', 'danger')
         return redirect(url_for('users'))
 
-    u = User.query.get_or_404(uid)
-    if u.role == 'Super Admin':
-        flash('The Super Admin account cannot be deleted.', 'danger')
-        return redirect(url_for('users'))
-
+    cid = current_user.company_id
+    u   = User.query.filter_by(id=uid, company_id=cid).first_or_404()
     email = u.email
-    # Re-assign or nullify owned records safely before deletion
+
     reassign_user_id = current_user.id
-    Task.query.filter_by(assigned_to_id=u.id).update({'assigned_to_id': reassign_user_id})
-    Task.query.filter_by(assigned_by_id=u.id).update({'assigned_by_id': reassign_user_id})
-    Evidence.query.filter_by(employee_id=u.id).update({'employee_id': reassign_user_id})
-    Evidence.query.filter_by(reviewer_id=u.id).update({'reviewer_id': None})
-    Audit.query.filter_by(auditor_id=u.id).update({'auditor_id': reassign_user_id})
-    Policy.query.filter_by(created_by_id=u.id).update({'created_by_id': reassign_user_id})
-    RiskAssessment.query.filter_by(assessed_by_id=u.id).update({'assessed_by_id': reassign_user_id})
+    Task.query.filter_by(company_id=cid, assigned_to_id=u.id).update({'assigned_to_id': reassign_user_id})
+    Task.query.filter_by(company_id=cid, assigned_by_id=u.id).update({'assigned_by_id': reassign_user_id})
+    Evidence.query.filter_by(company_id=cid, employee_id=u.id).update({'employee_id': reassign_user_id})
+    Evidence.query.filter_by(company_id=cid, reviewer_id=u.id).update({'reviewer_id': None})
+    Audit.query.filter_by(company_id=cid, auditor_id=u.id).update({'auditor_id': reassign_user_id})
+    Policy.query.filter_by(company_id=cid, created_by_id=u.id).update({'created_by_id': reassign_user_id})
+    RiskAssessment.query.filter_by(company_id=cid, assessed_by_id=u.id).update({'assessed_by_id': reassign_user_id})
     Notification.query.filter_by(user_id=u.id).delete()
     ActivityLog.query.filter_by(user_id=u.id).update({'user_id': None})
 
@@ -660,14 +785,17 @@ def delete_user(uid):
 @app.route('/frameworks')
 @login_required
 def frameworks():
-    return render_template('frameworks/index.html', frameworks=Framework.query.all())
+    cid = current_user.company_id
+    return render_template('frameworks/index.html', frameworks=Framework.query.filter_by(company_id=cid).all())
 
 
 @app.route('/frameworks/add', methods=['POST'])
 @login_required
 @role_required('Super Admin', 'Admin')
 def add_framework():
+    cid = current_user.company_id
     fw = Framework(
+        company_id=cid,
         name=request.form['name'], code=request.form['code'],
         version=request.form.get('version', '1.0'),
         category=request.form.get('category'),
@@ -684,7 +812,8 @@ def add_framework():
 @login_required
 @role_required('Super Admin', 'Admin')
 def toggle_framework(fw_id):
-    fw = Framework.query.get_or_404(fw_id)
+    cid = current_user.company_id
+    fw = Framework.query.filter_by(id=fw_id, company_id=cid).first_or_404()
     fw.status = 'Disabled' if fw.status == 'Enabled' else 'Enabled'
     db.session.commit()
     flash(f'Framework {fw.name} is now {fw.status}.', 'info')
@@ -695,7 +824,8 @@ def toggle_framework(fw_id):
 @login_required
 @role_required('Super Admin', 'Admin')
 def delete_framework(fw_id):
-    fw = Framework.query.get_or_404(fw_id)
+    cid = current_user.company_id
+    fw = Framework.query.filter_by(id=fw_id, company_id=cid).first_or_404()
     db.session.delete(fw); db.session.commit()
     log_activity('Framework Deleted', fw.name)
     flash('Framework deleted.', 'success')
@@ -705,16 +835,19 @@ def delete_framework(fw_id):
 @app.route('/policies')
 @login_required
 def policies():
+    cid = current_user.company_id
     return render_template('policies/index.html',
-                           policies=Policy.query.all(),
-                           frameworks=Framework.query.filter_by(status='Enabled').all())
+                           policies=Policy.query.filter_by(company_id=cid).all(),
+                           frameworks=Framework.query.filter_by(company_id=cid, status='Enabled').all())
 
 
 @app.route('/policies/create', methods=['POST'])
 @login_required
 @role_required('Super Admin', 'Admin')
 def create_policy():
+    cid = current_user.company_id
     p = Policy(
+        company_id=cid,
         title=request.form['title'], policy_code=request.form['policy_code'],
         framework_id=request.form['framework_id'],
         category=request.form.get('category'),
@@ -731,7 +864,8 @@ def create_policy():
 @login_required
 @role_required('Super Admin', 'Admin')
 def archive_policy(pid):
-    p = Policy.query.get_or_404(pid)
+    cid = current_user.company_id
+    p = Policy.query.filter_by(id=pid, company_id=cid).first_or_404()
     p.status = 'Archived'; db.session.commit()
     flash(f'Policy {p.policy_code} archived.', 'warning')
     return redirect(url_for('policies'))
@@ -740,16 +874,19 @@ def archive_policy(pid):
 @app.route('/controls')
 @login_required
 def controls():
+    cid = current_user.company_id
     return render_template('controls/index.html',
-                           controls=Control.query.all(),
-                           frameworks=Framework.query.filter_by(status='Enabled').all())
+                           controls=Control.query.filter_by(company_id=cid).all(),
+                           frameworks=Framework.query.filter_by(company_id=cid, status='Enabled').all())
 
 
 @app.route('/controls/create', methods=['POST'])
 @login_required
 @role_required('Super Admin', 'Admin')
 def create_control():
+    cid = current_user.company_id
     c = Control(
+        company_id=cid,
         framework_id=request.form['framework_id'],
         control_code=request.form['control_code'],
         name=request.form['name'],
@@ -764,11 +901,12 @@ def create_control():
     return redirect(url_for('controls'))
 
 
-@app.route('/controls/<int:cid>/status', methods=['POST'])
+@app.route('/controls/<int:cid_val>/status', methods=['POST'])
 @login_required
 @role_required('Super Admin', 'Admin', 'Auditor')
-def update_control_status(cid):
-    c = Control.query.get_or_404(cid)
+def update_control_status(cid_val):
+    cid = current_user.company_id
+    c = Control.query.filter_by(id=cid_val, company_id=cid).first_or_404()
     c.status = request.form.get('status', c.status)
     db.session.commit()
     flash(f'Control {c.control_code} → {c.status}.', 'success')
@@ -782,22 +920,24 @@ def update_control_status(cid):
 @app.route('/tasks')
 @login_required
 def tasks():
+    cid = current_user.company_id
     if current_user.role in ['Super Admin', 'Admin', 'Auditor']:
-        task_list = Task.query.order_by(Task.due_date).all()
+        task_list = Task.query.filter_by(company_id=cid).order_by(Task.due_date).all()
     else:
         task_list = (Task.query
-                     .filter_by(assigned_to_id=current_user.id)
+                     .filter_by(company_id=cid, assigned_to_id=current_user.id)
                      .order_by(Task.due_date).all())
     return render_template('tasks/index.html',
                            tasks=task_list,
-                           users=User.query.filter_by(status='Active').all(),
-                           controls=Control.query.all())
+                           users=User.query.filter_by(company_id=cid, status='Active').all(),
+                           controls=Control.query.filter_by(company_id=cid).all())
 
 
 @app.route('/tasks/create', methods=['POST'])
 @login_required
 @role_required('Super Admin', 'Admin')
 def create_task():
+    cid = current_user.company_id
     title = _normalize_text(request.form.get('title', ''))
     assigned_to_id = request.form.get('assigned_to_id')
     if not title or not assigned_to_id:
@@ -809,6 +949,7 @@ def create_task():
         flash('Please provide a valid due date.', 'danger')
         return redirect(url_for('tasks'))
     t = Task(
+        company_id=cid,
         title=title,
         description=_normalize_text(request.form.get('description')),
         control_id=request.form.get('control_id') or None,
@@ -832,14 +973,15 @@ def create_task():
 @app.route('/evidence')
 @login_required
 def evidence():
+    cid = current_user.company_id
     if current_user.role in ['Super Admin', 'Admin', 'Auditor']:
-        evs   = Evidence.query.order_by(Evidence.uploaded_at.desc()).all()
-        tsks  = Task.query.all()
+        evs   = Evidence.query.filter_by(company_id=cid).order_by(Evidence.uploaded_at.desc()).all()
+        tsks  = Task.query.filter_by(company_id=cid).all()
     else:
         evs   = (Evidence.query
-                 .filter_by(employee_id=current_user.id)
+                 .filter_by(company_id=cid, employee_id=current_user.id)
                  .order_by(Evidence.uploaded_at.desc()).all())
-        tsks  = Task.query.filter_by(assigned_to_id=current_user.id).all()
+        tsks  = Task.query.filter_by(company_id=cid, assigned_to_id=current_user.id).all()
     return render_template('evidence/index.html',
                            evidences=evs, tasks=tsks,
                            selected_task_id=request.args.get('task_id'))
@@ -848,6 +990,7 @@ def evidence():
 @app.route('/evidence/upload', methods=['POST'])
 @login_required
 def upload_evidence():
+    cid = current_user.company_id
     task_id = request.form.get('task_id')
     f       = request.files.get('evidence_file')
     if not f or not f.filename:
@@ -860,6 +1003,7 @@ def upload_evidence():
     f.save(save_path)
 
     ev = Evidence(
+        company_id=cid,
         task_id=task_id, employee_id=current_user.id,
         file_path=f'uploads/{fname}', file_name=fname,
         file_type=f.content_type,
@@ -867,10 +1011,9 @@ def upload_evidence():
         review_status='Pending'
     )
     db.session.add(ev)
-    task = Task.query.get(task_id)
+    task = Task.query.filter_by(id=task_id, company_id=cid).first()
     if task:
         task.status = 'Under Review'
-    if task:
         create_notification(task.assigned_to_id, 'Evidence Submitted', 'A new evidence file has been uploaded for review.', link='/evidence', notification_type='success')
     db.session.commit()
     log_activity('Evidence Uploaded', fname)
@@ -882,7 +1025,8 @@ def upload_evidence():
 @login_required
 @role_required('Super Admin', 'Admin', 'Auditor')
 def review_evidence(eid):
-    ev = Evidence.query.get_or_404(eid)
+    cid = current_user.company_id
+    ev = Evidence.query.filter_by(id=eid, company_id=cid).first_or_404()
     ev.review_status     = request.form.get('review_status')
     ev.reviewer_comments = request.form.get('reviewer_comments')
     ev.reviewer_id       = current_user.id
@@ -903,10 +1047,11 @@ def review_evidence(eid):
 @app.route('/audits')
 @login_required
 def audits():
+    cid = current_user.company_id
     return render_template('audits/index.html',
-                           audits=Audit.query.order_by(Audit.start_date.desc()).all(),
-                           frameworks=Framework.query.filter_by(status='Enabled').all(),
-                           auditors=User.query.filter(User.role.in_(
+                           audits=Audit.query.filter_by(company_id=cid).order_by(Audit.start_date.desc()).all(),
+                           frameworks=Framework.query.filter_by(company_id=cid, status='Enabled').all(),
+                           auditors=User.query.filter_by(company_id=cid).filter(User.role.in_(
                                ['Auditor', 'Admin', 'Super Admin'])).all())
 
 
@@ -914,6 +1059,7 @@ def audits():
 @login_required
 @role_required('Super Admin', 'Admin', 'Auditor')
 def create_audit():
+    cid = current_user.company_id
     name = _normalize_text(request.form.get('name', ''))
     audit_code = _normalize_text(request.form.get('audit_code', ''))
     if not name or not audit_code:
@@ -926,6 +1072,7 @@ def create_audit():
         flash('Please provide valid audit dates.', 'danger')
         return redirect(url_for('audits'))
     a = Audit(
+        company_id=cid,
         name=name, audit_code=audit_code,
         framework_id=request.form['framework_id'],
         auditor_id=request.form['auditor_id'],
@@ -945,7 +1092,8 @@ def create_audit():
 @login_required
 @role_required('Super Admin', 'Admin', 'Auditor')
 def update_audit_findings(aid):
-    a = Audit.query.get_or_404(aid)
+    cid = current_user.company_id
+    a = Audit.query.filter_by(id=aid, company_id=cid).first_or_404()
     a.status          = request.form.get('status', a.status)
     a.final_status    = request.form.get('final_status', a.final_status)
     a.findings        = request.form.get('findings')
@@ -962,16 +1110,18 @@ def update_audit_findings(aid):
 @app.route('/risk-assessment')
 @login_required
 def risk_assessment():
+    cid = current_user.company_id
     return render_template('risk/index.html',
-                           risks=RiskAssessment.query.order_by(
+                           risks=RiskAssessment.query.filter_by(company_id=cid).order_by(
                                RiskAssessment.risk_score.desc()).all(),
-                           controls=Control.query.all())
+                           controls=Control.query.filter_by(company_id=cid).all())
 
 
 @app.route('/risk-assessment/create', methods=['POST'])
 @login_required
 @role_required('Super Admin', 'Admin', 'Auditor')
 def create_risk():
+    cid   = current_user.company_id
     lkl   = int(request.form.get('likelihood', 3))
     imp   = int(request.form.get('impact', 3))
     score = lkl * imp
@@ -981,6 +1131,7 @@ def create_risk():
         flash('Risk title is required.', 'danger')
         return redirect(url_for('risk_assessment'))
     r = RiskAssessment(
+        company_id=cid,
         title=title,
         asset_scope=request.form.get('asset_scope'),
         likelihood=lkl, impact=imp,
@@ -1001,13 +1152,14 @@ def create_risk():
 @app.route('/ai-studio')
 @login_required
 def ai_studio():
-    ctrls   = Control.query.all()
+    cid     = current_user.company_id
+    ctrls   = Control.query.filter_by(company_id=cid).all()
     missing = AIConsultant.analyze_missing_controls(ctrls)
-    highr   = RiskAssessment.query.filter(
+    highr   = RiskAssessment.query.filter_by(company_id=cid).filter(
         RiskAssessment.risk_level.in_(['High', 'Critical'])).all()
     summary = AIConsultant.generate_executive_risk_summary(
-        highr, Audit.query.count(),
-        Task.query.filter(Task.status != 'Completed').count())
+        highr, Audit.query.filter_by(company_id=cid).count(),
+        Task.query.filter_by(company_id=cid).filter(Task.status != 'Completed').count())
     return render_template('ai/studio.html', missing_controls=missing, ai_risk_summary=summary)
 
 
@@ -1025,15 +1177,16 @@ def ai_chat_api():
 # ─────────────────────────────────────────────
 
 def _report_stats():
+    cid = current_user.company_id
     return {
-        'total_employees':  User.query.count(),
-        'total_policies':   Policy.query.filter_by(status='Active').count(),
-        'total_frameworks': Framework.query.filter_by(status='Enabled').count(),
+        'total_employees':  User.query.filter_by(company_id=cid).count(),
+        'total_policies':   Policy.query.filter_by(company_id=cid, status='Active').count(),
+        'total_frameworks': Framework.query.filter_by(company_id=cid, status='Enabled').count(),
         'compliance_score': compliance_score(),
-        'pending_tasks':    Task.query.filter(Task.status.in_(['Pending', 'In Progress', 'Overdue'])).count(),
-        'completed_tasks':  Task.query.filter_by(status='Completed').count(),
-        'high_risks':       RiskAssessment.query.filter(RiskAssessment.risk_level.in_(['High', 'Critical'])).count(),
-        'total_audits':     Audit.query.count(),
+        'pending_tasks':    Task.query.filter_by(company_id=cid).filter(Task.status.in_(['Pending', 'In Progress', 'Overdue'])).count(),
+        'completed_tasks':  Task.query.filter_by(company_id=cid, status='Completed').count(),
+        'high_risks':       RiskAssessment.query.filter_by(company_id=cid).filter(RiskAssessment.risk_level.in_(['High', 'Critical'])).count(),
+        'total_audits':     Audit.query.filter_by(company_id=cid).count(),
     }
 
 
@@ -1046,9 +1199,11 @@ def reports():
 @app.route('/reports/export/excel')
 @login_required
 def export_excel_report():
+    cid = current_user.company_id
     buf = ReportGenerator.generate_excel_compliance_report(
-        _report_stats(), Framework.query.all(),
-        Task.query.all(), Audit.query.all(), RiskAssessment.query.all())
+        _report_stats(), Framework.query.filter_by(company_id=cid).all(),
+        Task.query.filter_by(company_id=cid).all(), Audit.query.filter_by(company_id=cid).all(),
+        RiskAssessment.query.filter_by(company_id=cid).all())
     log_activity('Report Exported', 'Excel')
     return send_file(buf,
                      mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -1059,9 +1214,11 @@ def export_excel_report():
 @app.route('/reports/export/pdf')
 @login_required
 def export_pdf_report():
+    cid = current_user.company_id
     buf = ReportGenerator.generate_pdf_report(
-        _report_stats(), Framework.query.all(),
-        Task.query.all(), Audit.query.all(), RiskAssessment.query.all())
+        _report_stats(), Framework.query.filter_by(company_id=cid).all(),
+        Task.query.filter_by(company_id=cid).all(), Audit.query.filter_by(company_id=cid).all(),
+        RiskAssessment.query.filter_by(company_id=cid).all())
     log_activity('Report Exported', 'PDF')
     return send_file(buf, mimetype='application/pdf', as_attachment=True,
                      download_name=f"Compliance_Audit_{get_ist_now().strftime('%Y%m%d_%H%M%S')}.pdf")
@@ -1075,14 +1232,17 @@ def export_pdf_report():
 @login_required
 @role_required('Super Admin', 'Admin')
 def departments():
-    return render_template('departments/index.html', departments=Department.query.all())
+    cid = current_user.company_id
+    return render_template('departments/index.html', departments=Department.query.filter_by(company_id=cid).all())
 
 
 @app.route('/departments/create', methods=['POST'])
 @login_required
 @role_required('Super Admin', 'Admin')
 def create_department():
+    cid = current_user.company_id
     d = Department(
+        company_id=cid,
         name=request.form['name'], code=request.form['code'],
         manager_name=request.form.get('manager_name'),
         description=request.form.get('description'))
@@ -1099,8 +1259,9 @@ def create_department():
 @app.route('/notifications')
 @login_required
 def notifications():
+    cid = current_user.company_id
     notifs = (Notification.query
-              .filter_by(user_id=current_user.id)
+              .filter_by(company_id=cid, user_id=current_user.id)
               .order_by(Notification.created_at.desc()).all())
     for n in notifs:
         n.is_read = True
@@ -1116,9 +1277,10 @@ def notifications():
 @login_required
 @role_required('Super Admin')
 def logs():
+    cid    = current_user.company_id
     page   = request.args.get('page', 1, type=int)
     q      = request.args.get('q', '').strip()
-    qry    = ActivityLog.query
+    qry    = ActivityLog.query.filter_by(company_id=cid)
     if q:
         qry = qry.filter(
             ActivityLog.user_name.ilike(f'%{q}%') |
@@ -1185,14 +1347,12 @@ def profile():
 
 
 # ─────────────────────────────────────────────
-# =============================================
-#  APPLICATION STARTUP
-# =============================================
+# APPLICATION STARTUP
 # ─────────────────────────────────────────────
 
 with app.app_context():
-    db.create_all()          # create tables if they do not exist
-    _ensure_default_superadmin()   # seed Super Admin on first run
+    db.create_all()
+    _ensure_default_superadmin()
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)

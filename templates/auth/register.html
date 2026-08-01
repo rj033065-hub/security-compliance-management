@@ -1,38 +1,49 @@
 {% extends "layout/auth_base.html" %}
 
-{% block title %}Register - Security Compliance System{% endblock %}
+{% block title %}Employee Registration - Security Compliance System{% endblock %}
 
 {% block content %}
-<h5 class="fw-bold mb-3 text-dark text-center">Create Employee Account</h5>
+<div class="text-center mb-3">
+    <h5 class="fw-bold text-dark mb-1">Create Employee Account</h5>
+    <p class="text-muted small">Register as an employee under your company</p>
+</div>
 
 <form action="{{ url_for('register') }}" method="POST">
     <div class="mb-3">
-        <label class="form-label small fw-semibold text-secondary">Full Name</label>
-        <input type="text" name="full_name" class="form-control" placeholder="e.g. John Doe" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label small fw-semibold text-secondary">Username</label>
-        <input type="text" name="username" class="form-control" placeholder="e.g. john.doe" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label small fw-semibold text-secondary">Email Address</label>
-        <input type="email" name="email" class="form-control" placeholder="john@company.com" required>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label small fw-semibold text-secondary">Select Department</label>
-        <select name="department_id" class="form-select">
-            <option value="">-- Select Department --</option>
-            {% for dept in departments %}
-                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+        <label class="form-label small fw-semibold text-secondary">Select Company <span class="text-danger">*</span></label>
+        <select name="company_id" id="companySelect" class="form-select" required>
+            <option value="">-- Select Your Organization --</option>
+            {% for comp in companies %}
+                <option value="{{ comp.id }}">{{ comp.name }} ({{ comp.code }})</option>
             {% endfor %}
         </select>
     </div>
 
     <div class="mb-3">
-        <label class="form-label small fw-semibold text-secondary">Password</label>
+        <label class="form-label small fw-semibold text-secondary">Full Name <span class="text-danger">*</span></label>
+        <input type="text" name="full_name" class="form-control" placeholder="e.g. John Doe" required>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Username <span class="text-danger">*</span></label>
+            <input type="text" name="username" class="form-control" placeholder="e.g. john.doe" required>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label small fw-semibold text-secondary">Email Address <span class="text-danger">*</span></label>
+            <input type="email" name="email" class="form-control" placeholder="john@company.com" required>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label small fw-semibold text-secondary">Select Department</label>
+        <select name="department_id" id="departmentSelect" class="form-select">
+            <option value="">-- Select Department --</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label small fw-semibold text-secondary">Password <span class="text-danger">*</span></label>
         <input type="password" name="password" class="form-control" placeholder="Minimum 8 characters" required minlength="8">
     </div>
 
@@ -40,7 +51,37 @@
 </form>
 
 <div class="text-center border-top pt-3">
-    <span class="small text-muted">Already registered?</span>
-    <a href="{{ url_for('login') }}" class="small fw-bold text-decoration-none ms-1">Sign In</a>
+    <span class="small text-muted">Want to register a new company?</span>
+    <a href="{{ url_for('register_company') }}" class="small fw-bold text-decoration-none ms-1">Register Company</a>
+    <div class="mt-1">
+        <span class="small text-muted">Already registered?</span>
+        <a href="{{ url_for('login') }}" class="small fw-bold text-decoration-none ms-1">Sign In</a>
+    </div>
 </div>
+
+<script>
+document.getElementById('companySelect').addEventListener('change', function() {
+    const cid = this.value;
+    const deptSelect = document.getElementById('departmentSelect');
+    deptSelect.innerHTML = '<option value="">-- Loading Departments --</option>';
+    if (!cid) {
+        deptSelect.innerHTML = '<option value="">-- Select Department --</option>';
+        return;
+    }
+    fetch(`/api/company/${cid}/departments`)
+        .then(res => res.json())
+        .then(depts => {
+            deptSelect.innerHTML = '<option value="">-- Select Department --</option>';
+            depts.forEach(d => {
+                const opt = document.createElement('option');
+                opt.value = d.id;
+                opt.textContent = `${d.name} (${d.code})`;
+                deptSelect.appendChild(opt);
+            });
+        })
+        .catch(err => {
+            deptSelect.innerHTML = '<option value="">-- Select Department --</option>';
+        });
+});
+</script>
 {% endblock %}

@@ -7,18 +7,45 @@ from services.timezone_service import get_ist_now
 db = SQLAlchemy()
 
 # ─────────────────────────────────────────────
+# Company (Tenant)
+# ─────────────────────────────────────────────
+class Company(db.Model):
+    __tablename__ = 'companies'
+    id            = db.Column(db.Integer, primary_key=True)
+    name          = db.Column(db.String(150), nullable=False, unique=True)
+    code          = db.Column(db.String(50),  nullable=False, unique=True)
+    contact_email = db.Column(db.String(120), nullable=True)
+    status        = db.Column(db.String(20),  default='Active')
+    created_at    = db.Column(db.DateTime,    default=get_ist_now)
+
+    users            = db.relationship('User', backref='company', lazy=True, cascade='all, delete-orphan')
+    departments      = db.relationship('Department', backref='company', lazy=True, cascade='all, delete-orphan')
+    policies         = db.relationship('Policy', backref='company', lazy=True, cascade='all, delete-orphan')
+    controls         = db.relationship('Control', backref='company', lazy=True, cascade='all, delete-orphan')
+    tasks            = db.relationship('Task', backref='company', lazy=True, cascade='all, delete-orphan')
+    evidences        = db.relationship('Evidence', backref='company', lazy=True, cascade='all, delete-orphan')
+    audits           = db.relationship('Audit', backref='company', lazy=True, cascade='all, delete-orphan')
+    risk_assessments = db.relationship('RiskAssessment', backref='company', lazy=True, cascade='all, delete-orphan')
+    notifications    = db.relationship('Notification', backref='company', lazy=True, cascade='all, delete-orphan')
+    activity_logs    = db.relationship('ActivityLog', backref='company', lazy=True, cascade='all, delete-orphan')
+    frameworks       = db.relationship('Framework', backref='company', lazy=True, cascade='all, delete-orphan')
+
+
+# ─────────────────────────────────────────────
 # Department
 # ─────────────────────────────────────────────
 class Department(db.Model):
     __tablename__ = 'departments'
     id            = db.Column(db.Integer, primary_key=True)
-    name          = db.Column(db.String(100), nullable=False, unique=True)
-    code          = db.Column(db.String(20),  nullable=False, unique=True)
+    company_id    = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
+    name          = db.Column(db.String(100), nullable=False)
+    code          = db.Column(db.String(20),  nullable=False)
     description   = db.Column(db.Text,        nullable=True)
     manager_name  = db.Column(db.String(100), nullable=True)
     created_at    = db.Column(db.DateTime,    default=get_ist_now)
 
     users = db.relationship('User', backref='department', lazy=True)
+
 
 # ─────────────────────────────────────────────
 # User  (core auth model)
@@ -26,6 +53,7 @@ class Department(db.Model):
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id                  = db.Column(db.Integer, primary_key=True)
+    company_id          = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     full_name           = db.Column(db.String(100), nullable=False)
     username            = db.Column(db.String(80),  nullable=False, unique=True)
     email               = db.Column(db.String(120), nullable=False, unique=True, index=True)
@@ -48,7 +76,7 @@ class User(UserMixin, db.Model):
     evidence_up     = db.relationship('Evidence', foreign_keys='Evidence.employee_id',  backref='uploader',  lazy=True)
     evidence_rev    = db.relationship('Evidence', foreign_keys='Evidence.reviewer_id',  backref='reviewer',  lazy=True)
     audits_as       = db.relationship('Audit',   foreign_keys='Audit.auditor_id',       backref='auditor',   lazy=True)
-    notifications   = db.relationship('Notification', backref='user', lazy=True)
+    notifications   = db.relationship('Notification', foreign_keys='Notification.user_id', backref='user', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -68,14 +96,16 @@ class User(UserMixin, db.Model):
     def is_auditor(self):
         return self.role in ['Super Admin', 'Admin', 'Auditor']
 
+
 # ─────────────────────────────────────────────
 # Compliance Framework
 # ─────────────────────────────────────────────
 class Framework(db.Model):
     __tablename__ = 'frameworks'
     id          = db.Column(db.Integer, primary_key=True)
-    name        = db.Column(db.String(100), nullable=False, unique=True)
-    code        = db.Column(db.String(30),  nullable=False, unique=True)
+    company_id  = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
+    name        = db.Column(db.String(100), nullable=False)
+    code        = db.Column(db.String(30),  nullable=False)
     version     = db.Column(db.String(20),  nullable=False, default='1.0')
     description = db.Column(db.Text,        nullable=True)
     category    = db.Column(db.String(50),  nullable=True)
@@ -86,14 +116,16 @@ class Framework(db.Model):
     controls = db.relationship('Control', backref='framework', lazy=True, cascade='all, delete-orphan')
     audits   = db.relationship('Audit',   backref='framework', lazy=True)
 
+
 # ─────────────────────────────────────────────
 # Security Policy
 # ─────────────────────────────────────────────
 class Policy(db.Model):
     __tablename__ = 'policies'
     id            = db.Column(db.Integer, primary_key=True)
+    company_id    = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     title         = db.Column(db.String(200), nullable=False)
-    policy_code   = db.Column(db.String(50),  nullable=False, unique=True)
+    policy_code   = db.Column(db.String(50),  nullable=False)
     framework_id  = db.Column(db.Integer, db.ForeignKey('frameworks.id'), nullable=False)
     category      = db.Column(db.String(100), nullable=True)
     description   = db.Column(db.Text,        nullable=True)
@@ -105,12 +137,14 @@ class Policy(db.Model):
 
     creator = db.relationship('User', foreign_keys=[created_by_id])
 
+
 # ─────────────────────────────────────────────
 # Security Control
 # ─────────────────────────────────────────────
 class Control(db.Model):
     __tablename__ = 'controls'
     id           = db.Column(db.Integer, primary_key=True)
+    company_id   = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     framework_id = db.Column(db.Integer, db.ForeignKey('frameworks.id'), nullable=False)
     control_code = db.Column(db.String(50),  nullable=False)
     name         = db.Column(db.String(200), nullable=False)
@@ -122,12 +156,14 @@ class Control(db.Model):
     tasks = db.relationship('Task',           backref='control', lazy=True)
     risks = db.relationship('RiskAssessment', backref='control', lazy=True)
 
+
 # ─────────────────────────────────────────────
 # Compliance Task
 # ─────────────────────────────────────────────
 class Task(db.Model):
     __tablename__ = 'tasks'
     id              = db.Column(db.Integer, primary_key=True)
+    company_id      = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     title           = db.Column(db.String(200), nullable=False)
     description     = db.Column(db.Text,        nullable=True)
     control_id      = db.Column(db.Integer, db.ForeignKey('controls.id'), nullable=True)
@@ -141,12 +177,14 @@ class Task(db.Model):
 
     evidences = db.relationship('Evidence', backref='task', lazy=True, cascade='all, delete-orphan')
 
+
 # ─────────────────────────────────────────────
 # Evidence
 # ─────────────────────────────────────────────
 class Evidence(db.Model):
     __tablename__ = 'evidences'
     id               = db.Column(db.Integer, primary_key=True)
+    company_id       = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     task_id          = db.Column(db.Integer, db.ForeignKey('tasks.id'),    nullable=False)
     employee_id      = db.Column(db.Integer, db.ForeignKey('users.id'),    nullable=False)
     file_path        = db.Column(db.String(255), nullable=False)
@@ -159,14 +197,16 @@ class Evidence(db.Model):
     uploaded_at      = db.Column(db.DateTime, default=get_ist_now)
     reviewed_at      = db.Column(db.DateTime, nullable=True)
 
+
 # ─────────────────────────────────────────────
 # Audit Engagement
 # ─────────────────────────────────────────────
 class Audit(db.Model):
     __tablename__ = 'audits'
     id              = db.Column(db.Integer, primary_key=True)
+    company_id      = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     name            = db.Column(db.String(200), nullable=False)
-    audit_code      = db.Column(db.String(50),  nullable=False, unique=True)
+    audit_code      = db.Column(db.String(50),  nullable=False)
     framework_id    = db.Column(db.Integer, db.ForeignKey('frameworks.id'), nullable=False)
     auditor_id      = db.Column(db.Integer, db.ForeignKey('users.id'),      nullable=False)
     start_date      = db.Column(db.Date,        nullable=False)
@@ -178,12 +218,14 @@ class Audit(db.Model):
     final_status    = db.Column(db.String(30),  default='Pending')
     created_at      = db.Column(db.DateTime,    default=get_ist_now)
 
+
 # ─────────────────────────────────────────────
 # Risk Assessment
 # ─────────────────────────────────────────────
 class RiskAssessment(db.Model):
     __tablename__ = 'risk_assessments'
     id              = db.Column(db.Integer, primary_key=True)
+    company_id      = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     title           = db.Column(db.String(200), nullable=False)
     control_id      = db.Column(db.Integer, db.ForeignKey('controls.id'), nullable=True)
     asset_scope     = db.Column(db.String(200), nullable=True)
@@ -197,12 +239,14 @@ class RiskAssessment(db.Model):
 
     assessor = db.relationship('User', foreign_keys=[assessed_by_id])
 
+
 # ─────────────────────────────────────────────
 # Notification
 # ─────────────────────────────────────────────
 class Notification(db.Model):
     __tablename__ = 'notifications'
     id         = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     user_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     title      = db.Column(db.String(150), nullable=False)
     message    = db.Column(db.Text,        nullable=False)
@@ -211,12 +255,14 @@ class Notification(db.Model):
     link       = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime,   default=get_ist_now)
 
+
 # ─────────────────────────────────────────────
 # Activity / Audit Log
 # ─────────────────────────────────────────────
 class ActivityLog(db.Model):
     __tablename__ = 'activity_logs'
     id         = db.Column(db.Integer, primary_key=True)
+    company_id = db.Column(db.Integer, db.ForeignKey('companies.id'), nullable=True)
     user_id    = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     user_name  = db.Column(db.String(100), nullable=False)
     user_role  = db.Column(db.String(50),  nullable=True)

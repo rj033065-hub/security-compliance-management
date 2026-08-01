@@ -1,0 +1,79 @@
+{% extends "layout/auth_base.html" %}
+
+{% block title %}Register Company - Security Compliance System{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <div class="d-inline-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle mb-2" style="width: 54px; height: 54px;">
+        <i class="bi bi-building fs-3"></i>
+    </div>
+    <h4 class="fw-bold text-dark mb-1">Register Your Organization</h4>
+    <p class="text-secondary small mb-0">Create your company account & get Super Admin access</p>
+</div>
+
+<form action="{{ url_for('register_company') }}" method="POST">
+    <!-- Section 1: Company Information -->
+    <div class="card border-0 bg-light mb-3">
+        <div class="card-body p-3">
+            <h6 class="fw-bold text-primary mb-3 text-uppercase fs-7 tracking-wider">
+                <i class="bi bi-briefcase me-1"></i> Organization Details
+            </h6>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold text-secondary">Company Name <span class="text-danger">*</span></label>
+                <input type="text" name="company_name" class="form-control" placeholder="e.g. Acme Corporation" required>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6 mb-2">
+                    <label class="form-label small fw-semibold text-secondary">Company Code</label>
+                    <input type="text" name="company_code" class="form-control text-uppercase" placeholder="e.g. ACME">
+                    <div class="form-text fs-8 text-muted">Short identifier (auto-generated if empty)</div>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <label class="form-label small fw-semibold text-secondary">Corporate Email</label>
+                    <input type="email" name="contact_email" class="form-control" placeholder="info@company.com">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 2: Super Admin Account -->
+    <div class="card border-0 bg-light mb-4">
+        <div class="card-body p-3">
+            <h6 class="fw-bold text-primary mb-3 text-uppercase fs-7 tracking-wider">
+                <i class="bi bi-person-badge me-1"></i> Super Admin Account
+            </h6>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold text-secondary">Super Admin Full Name <span class="text-danger">*</span></label>
+                <input type="text" name="full_name" class="form-control" placeholder="e.g. Alex Morgan" required>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Username <span class="text-danger">*</span></label>
+                    <input type="text" name="username" class="form-control" placeholder="e.g. alex.admin" required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small fw-semibold text-secondary">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" name="email" class="form-control" placeholder="alex@company.com" required>
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label small fw-semibold text-secondary">Password <span class="text-danger">*</span></label>
+                <input type="password" name="password" class="form-control" placeholder="Minimum 8 chars with 1 uppercase & 1 number" required minlength="8">
+            </div>
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 py-2.5 fw-bold shadow-sm mb-3">
+        <i class="bi bi-rocket-takeoff me-1"></i> Create Company & Super Admin
+    </button>
+</form>
+
+<div class="text-center border-top pt-3">
+    <span class="small text-muted">Joining an existing company?</span>
+    <a href="{{ url_for('register') }}" class="small fw-bold text-decoration-none ms-1">Register as Employee</a>
+    <div class="mt-1">
+        <span class="small text-muted">Already registered?</span>
+        <a href="{{ url_for('login') }}" class="small fw-bold text-decoration-none ms-1">Sign In</a>
+    </div>
+</div>
+{% endblock %}
